@@ -1,0 +1,53 @@
+diff --git a/libs/gui/BLASTBufferQueue.cpp b/libs/gui/BLASTBufferQueue.cpp
+index 05fbc14..aee3605 100644
+--- a/libs/gui/BLASTBufferQueue.cpp
++++ b/libs/gui/BLASTBufferQueue.cpp
+@@ -28,6 +28,8 @@
+ #include <gui/BufferQueueConsumer.h>
+ #include <gui/BufferQueueCore.h>
+ #include <gui/BufferQueueProducer.h>
++#include <atomic>
++#include <climits>
+ #include <sys/epoll.h>
+ #include <sys/eventfd.h>
+ 
+@@ -1464,12 +1466,34 @@ status_t BufferReleaseReader::readBlocking(ReleaseCallbackId& outId, sp<Fence>&
+         timespec = timespecFromNanos(timeout);
+     }
+ 
++    static std::atomic<bool> sHasEpollPwait2{true};
++
+     epoll_event event{};
+-    int eventCount;
+-    do {
+-        eventCount = epoll_pwait2(mEpollFd.get(), &event, 1 /*maxevents*/,
+-                                  timespec ? &(*timespec) : nullptr, nullptr /*sigmask*/);
+-    } while (eventCount == -1 && errno == EINTR);
++    int eventCount = -1;
++    if (sHasEpollPwait2.load(std::memory_order_relaxed)) {
++        do {
++            eventCount = epoll_pwait2(mEpollFd.get(), &event, 1 /*maxevents*/,
++                                      timespec ? &(*timespec) : nullptr, nullptr /*sigmask*/);
++        } while (eventCount == -1 && errno == EINTR);
++
++        if (eventCount == -1 && errno == ENOSYS) {
++            sHasEpollPwait2.store(false, std::memory_order_relaxed);
++        }
++    }
++
++    if (!sHasEpollPwait2.load(std::memory_order_relaxed)) {
++        int timeoutMs = -1;
++        if (timeout == 0) {
++            timeoutMs = 0;
++        } else if (timeout > 0) {
++            constexpr nsecs_t kNanosPerMs = 1000000;
++            nsecs_t ms = (timeout + kNanosPerMs - 1) / kNanosPerMs;
++            timeoutMs = ms > INT_MAX ? INT_MAX : static_cast<int>(ms);
++        }
++        do {
++            eventCount = epoll_wait(mEpollFd.get(), &event, 1 /*maxevents*/, timeoutMs);
++        } while (eventCount == -1 && errno == EINTR);
++    }
+ 
+     if (eventCount == -1) {
+         ALOGE("epoll_wait error while waiting for buffer release. errno=%d message='%s'", errno,

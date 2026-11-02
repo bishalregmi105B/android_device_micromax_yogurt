@@ -1,0 +1,50 @@
+diff --git a/src/com/android/settings/password/SaveAndFinishWorker.java b/src/com/android/settings/password/SaveAndFinishWorker.java
+index d500cd9..3b5649c 100644
+--- a/src/com/android/settings/password/SaveAndFinishWorker.java
++++ b/src/com/android/settings/password/SaveAndFinishWorker.java
+@@ -16,6 +16,7 @@
+ 
+ package com.android.settings.password;
+ 
++import android.content.Context;
+ import android.content.Intent;
+ import android.os.AsyncTask;
+ import android.os.Bundle;
+@@ -161,13 +162,22 @@ public class SaveAndFinishWorker extends Fragment {
+     private void finish(Intent resultData) {
+         mFinished = true;
+         mResultData = resultData;
++        Context appContext = null;
++        Context ctx = getContext();
++        if (ctx != null) {
++            appContext = ctx.getApplicationContext();
++        }
+         if (mListener != null) {
+             mListener.onChosenLockSaveFinished(mWasSecureBefore, mResultData);
+         }
+         if (mUnificationProfileCredential != null) {
+             mUnificationProfileCredential.zeroize();
+         }
+-        LockScreenSafetySource.onLockScreenChange(getContext());
++        if (appContext != null) {
++            LockScreenSafetySource.onLockScreenChange(appContext);
++        } else if (getContext() != null) {
++            LockScreenSafetySource.onLockScreenChange(getContext());
++        }
+     }
+ 
+     public SaveAndFinishWorker setRequestGatekeeperPasswordHandle(boolean value) {
+diff --git a/src/com/android/settings/safetycenter/LockScreenSafetySource.java b/src/com/android/settings/safetycenter/LockScreenSafetySource.java
+index 61f05f7..ba7d315 100644
+--- a/src/com/android/settings/safetycenter/LockScreenSafetySource.java
++++ b/src/com/android/settings/safetycenter/LockScreenSafetySource.java
+@@ -121,6 +121,9 @@ public final class LockScreenSafetySource {
+ 
+     /** Notifies Safety Center of a change in lock screen settings. */
+     public static void onLockScreenChange(Context context) {
++        if (context == null) {
++            return;
++        }
+         setSafetySourceData(
+                 context,
+                 new ScreenLockPreferenceDetailsUtils(context),

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  yogurt = Micromax IN Note 1 (E7746 / mt6768 / Helio G85)
+  DerpFest 16.2 (Android 16 QPR2) bring-up manifest.
+  Maintainer: Bishal Regmi (bishalregmi105B)
+-->
+<manifest>
+
+  <remote name="yogurt-a16" fetch="https://github.com/bishalregmi105B" revision="sixteen"/>
+  <remote name="kernel-src" fetch="https://github.com/SakthivelNadar" />
+
+  <!-- Device tree (Android 16 QPR2 + patches/ + apply-patches.sh + VNDK v29/v30) -->
+  <project path="device/micromax/yogurt"
+           name="android_device_micromax_yogurt"
+           remote="yogurt-a16"
+           revision="sixteen"/>
+
+  <!-- Vendor tree (patched R-vendor blobs + VNDK shims + init rc fixes) -->
+  <project path="vendor/micromax/yogurt"
+           name="android_vendor_micromax_yogurt"
+           remote="yogurt-a16"
+           revision="sixteen"/>
+
+  <!-- MediaTek sepolicy_vndr updated for Android 16 -->
+  <project path="device/mediatek/sepolicy_vndr"
+           name="android_device_mediatek_sepolicy_vndr"
+           remote="yogurt-a16"
+           revision="sixteen"/>
+
+  <!-- hardware/mediatek (LineageOS 23.2 branch) -->
+  <project path="hardware/mediatek"
+           name="LineageOS/android_hardware_mediatek"
+           remote="github"
+           revision="lineage-23.2"/>
+
+</manifest>

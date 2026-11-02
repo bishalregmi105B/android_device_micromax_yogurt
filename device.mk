@@ -65,6 +65,12 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/rootdir/etc/fstab.mt6768:$(TARGET_COPY_OUT_RAMDISK)/fstab.mt6768
 
+# 2026-10-25 camera unlock: remove per-app aux-camera whitelist gate (48 MP
+# logical composite + aux quality streams for ALL apps). Installed on system
+# side; rc sets the vendor prop at boot in early-init/late-init/post-fs-data.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/rootdir/etc/init.yogurt.camera_unlock.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/init.yogurt.camera_unlock.rc
+
 # fastbootd
 PRODUCT_PACKAGES += \
     fastbootd
@@ -160,8 +166,13 @@ PRODUCT_PACKAGES += \
     libaudiopreprocessing \
     libbundlewrapper \
     libdownmix \
-    android.hardware.bluetooth@1.0.vendor \
-    android.hardware.bluetooth.a2dp@1.0.vendor
+    android.hardware.bluetooth@1.0.vendor
+# 2026-10-25: dropped android.hardware.bluetooth.a2dp@1.0.vendor — module
+# removed upstream in the A15/A16 hardware/interfaces HIDL→AIDL migration
+# (bluetooth/1.0/Android.bp no longer builds it). The on-device a2dp HAL
+# service ships as a pinned MTK vendor blob, and the device VINTF manifest
+# declares no a2dp entry, so shipping this package was a no-op at runtime
+# and blocks module resolution at build time.
 
 # Neural Networks
 PRODUCT_PACKAGES += \
@@ -319,7 +330,7 @@ PRODUCT_PACKAGES += \
 # Shims
 PRODUCT_PACKAGES += \
     libshim_beanpod \
-#    libshim_vtservice
+    libshim_vtservice
 
 # Gatekeeper
 PRODUCT_PACKAGES += \
@@ -351,7 +362,12 @@ PRODUCT_PACKAGES += \
 
 # Inherit several Android Go Configurations (Beneficial for everyone, even on non-Go devices)
 PRODUCT_USE_PROFILE_FOR_BOOT_IMAGE := true
-PRODUCT_DEX_PREOPT_BOOT_IMAGE_PROFILE_LOCATION := frameworks/base/config/boot-image-profile.txt
+# 2026-10-25: stale lineage-era path dropped. Upstream A16 (bp4a) no longer
+# ships frameworks/base/config/boot-image-profile.txt; the canonical profile
+# now lives at art/build/boot/boot-image-profile.txt, appended by
+# build/make/target/product/default_art_config.mk. The explicit override
+# broke the prebuilt i18n/art bootclasspath fragments (soong: "source path
+# ... does not exist") and would have shipped a legacy-only profile anyway.
 
 # VNDK
 PRODUCT_COPY_FILES += \
@@ -367,6 +383,5 @@ PRODUCT_COPY_FILES += \
     prebuilts/vndk/v29/arm64/arch-arm64-armv8-a/shared/vndk-sp/libunwindstack.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libunwindstack-v29.so \
     prebuilts/vndk/v29/arm64/arch-arm64-armv8-a/shared/vndk-sp/libcompiler_rt.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libcompiler_rt.so \
     prebuilts/vndk/v29/arm64/arch-arm64-armv8-a/shared/vndk-sp/libutils.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libutils-v29.so \
-    prebuilts/vndk/v30/arm64/arch-arm64-armv8-a/shared/vndk-sp/libutils.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libutils-v30.so \
     prebuilts/vndk/v29/arm64/arch-arm64-armv8-a/shared/vndk-core/libxml2.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libxml2-v29.so \
     prebuilts/vndk/v30/arm64/arch-arm64-armv8-a/shared/vndk-core/libmedia_helper.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libmedia_helper-v30.so \

@@ -273,11 +273,28 @@
                    sampleRate="48000"
                    channels="1" />
         </EncoderProfile>
-        <EncoderProfile quality="highspeed720p" fileFormat="mp4" duration="30">
+        <!-- 2026-10-26: profiles added per LIVE HAL audit (research/FINDINGS.md
+             camera section, verified against the stock device): 4K30 real on
+             main (3840x2160 JPEG/YUV/RAW/YV12 streams, AE range 5..30);
+             1080p120 HIGH-SPEED real (HS table 30..120; NO 4K HS bucket).
+             NO 60fps NORMAL-mode profile added: AE ceiling is 30 fps normal
+             mode — a fake 60fps entry would desync legacy apps. -->
+        <EncoderProfile quality="2160p" fileFormat="mp4" duration="30">
             <Video codec="h264"
-                   bitRate="36000000"
-                   width="1280"
-                   height="720"
+                   bitRate="40000000"
+                   width="3840"
+                   height="2160"
+                   frameRate="30" />
+            <Audio codec="aac"
+                   bitRate="128000"
+                   sampleRate="48000"
+                   channels="1" />
+        </EncoderProfile>
+        <EncoderProfile quality="highspeed1080p" fileFormat="mp4" duration="30">
+            <Video codec="h264"
+                   bitRate="48000000"
+                   width="1920"
+                   height="1080"
                    frameRate="120" />
             <Audio codec="aac"
                    bitRate="128000"
@@ -467,6 +484,20 @@
                    bitRate="20000000"
                    width="1920"
                    height="1080"
+                   frameRate="30" />
+            <Audio codec="aac"
+                   bitRate="128000"
+                   sampleRate="48000"
+                   channels="1" />
+        </EncoderProfile>
+        <!-- 2026-10-26: front camera 2160p (4K30) profile added per LIVE HAL
+             audit — 4K stream configs exist on main+front (FINDINGS.md); no
+             HS profiles added for front (not evidenced live). -->
+        <EncoderProfile quality="2160p" fileFormat="mp4" duration="30">
+            <Video codec="h264"
+                   bitRate="40000000"
+                   width="3840"
+                   height="2160"
                    frameRate="30" />
             <Audio codec="aac"
                    bitRate="128000"

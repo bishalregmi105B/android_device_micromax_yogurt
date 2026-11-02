@@ -1,0 +1,188 @@
+diff --git a/app/src/main/java/org/lineageos/aperture/ext/MtkRequestOptions.kt b/app/src/main/java/org/lineageos/aperture/ext/MtkRequestOptions.kt
+new file mode 100644
+index 0000000..170c3c6
+--- /dev/null
++++ b/app/src/main/java/org/lineageos/aperture/ext/MtkRequestOptions.kt
+@@ -0,0 +1,143 @@
++/*
++ * SPDX-FileCopyrightText: The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * yogurt PRO extension — MTK vendor-pipeline capture controls.
++ * STAGED (merge AFTER first build exits, before cycle-2 app build).
++ * All writes are dynamic-key: if the vendor tag is absent on the active
++ * camera, every setter is a NO-OP — toggles OFF (or unsupported HAL) =
++ * pixel-identical upstream behavior (acceptance battery §7 of plan).
++ */
++
++package org.lineageos.aperture.ext
++
++import android.hardware.camera2.CameraCharacteristics
++import android.hardware.camera2.CaptureRequest
++import androidx.camera.camera2.interop.CaptureRequestOptions
++import org.lineageos.aperture.models.MtkMfbMode
++import org.lineageos.aperture.models.MtkTurboLevel
++
++private fun List<CaptureRequest.Key<*>>.named(vararg needles: String): CaptureRequest.Key<*>? =
++    firstOrNull { key -> needles.any { key.name.endsWith(it) || key.name.contains(it) } }
++
++private fun requestsFrom(characteristics: CameraCharacteristics): List<CaptureRequest.Key<*>> =
++    characteristics.availableSessionKeys.orEmpty() +
++        characteristics.availableCaptureRequestKeys.orEmpty()
++
++private fun findKey(characteristics: CameraCharacteristics, name: String): CaptureRequest.Key<*>? =
++    requestsFrom(characteristics).named(name)
++
++@androidx.camera.camera2.interop.ExperimentalCamera2Interop
++private fun CaptureRequestOptions.Builder.putNumeric(
++    key: CaptureRequest.Key<*>,
++    value: Int,
++): CaptureRequestOptions.Builder {
++    @Suppress("UNCHECKED_CAST")
++    setCaptureRequestOption(key as CaptureRequest.Key<Any>, value)
++    return this
++}
++
++@androidx.camera.camera2.interop.ExperimentalCamera2Interop
++private fun CaptureRequestOptions.Builder.clearNumeric(
++    key: CaptureRequest.Key<*>,
++): CaptureRequestOptions.Builder {
++    @Suppress("UNCHECKED_CAST")
++    clearCaptureRequestOption(key as CaptureRequest.Key<Any>)
++    return this
++}
++
++@androidx.camera.camera2.interop.ExperimentalCamera2Interop
++private fun CaptureRequestOptions.Builder.putBooleanish(
++    key: CaptureRequest.Key<*>,
++    enabled: Boolean,
++): CaptureRequestOptions.Builder = putNumeric(key, if (enabled) 1 else 0)
++
++@androidx.camera.camera2.interop.ExperimentalCamera2Interop
++fun CaptureRequestOptions.Builder.setMtkMfbMode(
++    characteristics: CameraCharacteristics,
++    mode: MtkMfbMode?,
++): CaptureRequestOptions.Builder {
++    val key = findKey(characteristics, "mfbmode") ?: return this
++    mode?.let { putNumeric(key, it.id) } ?: clearNumeric(key)
++    return this
++}
++
++@androidx.camera.camera2.interop.ExperimentalCamera2Interop
++fun CaptureRequestOptions.Builder.setMtkAisStabilization(
++    characteristics: CameraCharacteristics,
++    enabled: Boolean?,
++): CaptureRequestOptions.Builder {
++    val key = findKey(characteristics, "aismode") ?: return this
++    enabled?.let { putBooleanish(key, it) } ?: clearNumeric(key)
++    return this
++}
++
++@androidx.camera.camera2.interop.ExperimentalCamera2Interop
++fun CaptureRequestOptions.Builder.setMtkPhotoHdr(
++    characteristics: CameraCharacteristics,
++    enabled: Boolean?,
++): CaptureRequestOptions.Builder {
++    val key = findKey(characteristics, "hdrMode") ?: return this
++    enabled?.let { putBooleanish(key, it) } ?: clearNumeric(key)
++    return this
++}
++
++@androidx.camera.camera2.interop.ExperimentalCamera2Interop
++fun CaptureRequestOptions.Builder.setMtkRemosaic(
++    characteristics: CameraCharacteristics,
++    enabled: Boolean?,
++): CaptureRequestOptions.Builder {
++    val key = findKey(characteristics, "remosaicenable") ?: return this
++    enabled?.let { putBooleanish(key, it) } ?: clearNumeric(key)
++    return this
++}
++
++@androidx.camera.camera2.interop.ExperimentalCamera2Interop
++fun CaptureRequestOptions.Builder.setMtkVideoEis(
++    characteristics: CameraCharacteristics,
++    enabled: Boolean?,
++): CaptureRequestOptions.Builder {
++    val key = findKey(characteristics, "eismode") ?: return this
++    enabled?.let { putBooleanish(key, it) } ?: clearNumeric(key)
++    return this
++}
++
++/** One user dial (plan §4) expanded to the full desired pipeline set. */
++data class MtkPipeline(
++    val turbo: MtkTurboLevel,
++    val hdr: Boolean,
++    val ais: Boolean,
++)
++
++@androidx.camera.camera2.interop.ExperimentalCamera2Interop
++fun CaptureRequestOptions.Builder.setMtkPipeline(
++    characteristics: CameraCharacteristics,
++    pipeline: MtkPipeline?,
++): CaptureRequestOptions.Builder {
++    pipeline ?: return this
++    when (pipeline.turbo) {
++        MtkTurboLevel.OFF -> {
++            findKey(characteristics, "mfbmode")
++                ?.let { clearNumeric(it) }
++            findKey(characteristics, "hdrMode")
++                ?.let { clearNumeric(it) }
++            findKey(characteristics, "aismode")
++                ?.let { clearNumeric(it) }
++        }
++
++        MtkTurboLevel.AUTO -> {
++            findKey(characteristics, "mfbmode")
++                ?.let { putNumeric(it, MtkMfbMode.AUTO.id) }
++            setMtkPhotoHdr(characteristics, pipeline.hdr)
++            setMtkAisStabilization(characteristics, pipeline.ais)
++        }
++
++        MtkTurboLevel.QUALITY -> {
++            findKey(characteristics, "mfbmode")
++                ?.let { putNumeric(it, MtkMfbMode.QUALITY.id) }
++            setMtkPhotoHdr(characteristics, pipeline.hdr)
++            setMtkAisStabilization(characteristics, pipeline.ais)
++        }
++    }
++    return this
++}
+diff --git a/app/src/main/java/org/lineageos/aperture/models/MtkFeature.kt b/app/src/main/java/org/lineageos/aperture/models/MtkFeature.kt
+new file mode 100644
+index 0000000..2a48f80
+--- /dev/null
++++ b/app/src/main/java/org/lineageos/aperture/models/MtkFeature.kt
+@@ -0,0 +1,33 @@
++/*
++ * SPDX-FileCopyrightText: The LineageOS Project
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++package org.lineageos.aperture.models
++
++/**
++ * MTK MFB (multi-frame burst / MFnR) pipeline modes — values verified live on
++ * yogurt HAL: availablemfbmodes = [0, 1, 2, 255].
++ */
++enum class MtkMfbMode(val id: Int) {
++    OFF(0),
++    ON(1),
++    QUALITY(2),
++    AUTO(255),
++    ;
++
++    companion object {
++        fun from(id: Int?) = entries.firstOrNull { it.id == id }
++    }
++}
++
++/**
++ * One-dial "Turbo pipeline" level, mapped at write time into mfbmode +
++ * hdrMode + aismode (plan §4). AUTO = never write vendor keys (upstream parity).
++ */
++enum class MtkTurboLevel(val mfbId: Int) {
++    OFF(-1),
++    AUTO(255),
++    QUALITY(2),
++    ;
++}

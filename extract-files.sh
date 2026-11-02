@@ -54,6 +54,9 @@ function blob_fixup {
         vendor/lib64/hw/android.hardware.camera.provider@2.4-impl-mediatek.so)
             grep -q libshim_camera_metadata.so "$2" || patchelf --add-needed libshim_camera_metadata.so "$2"
             ;;
+        system/lib/libsource.so|lib/libsource.so)
+            grep -q libshim_vtservice.so "$2" || patchelf --add-needed libshim_vtservice.so "$2"
+            ;;
         vendor/etc/init/android.hardware.bluetooth@1.0-service-mediatek.rc)
             sed -i '/vts/Q' "$2"
             ;;

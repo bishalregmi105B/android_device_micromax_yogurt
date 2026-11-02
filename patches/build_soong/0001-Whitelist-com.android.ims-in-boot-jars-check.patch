@@ -1,0 +1,19 @@
+diff --git a/scripts/check_boot_jars/package_allowed_list.txt b/scripts/check_boot_jars/package_allowed_list.txt
+index f8c8bee..d68dc97 100644
+--- a/scripts/check_boot_jars/package_allowed_list.txt
++++ b/scripts/check_boot_jars/package_allowed_list.txt
+@@ -316,3 +316,14 @@ qcom.fmradio
+ ###################################################
+ # IFAA Manager used for Alipay and/or WeChat payment
+ org\.ifaa\.android\.manager.*
++
++###################################################
++# [build-ledger wall 21, 2026-10-29] IN Note 1 vendor boot jar
++# mediatek-framework.jar carries a small vendored UI-support package
++# (com.antaiui.R$anim etc., Antai UI internals bundled by the MTK framework
++# prebuilt). check_boot_jars rejected it: package not in this allowed list
++# (build_first_20261029_033718.log:8285). Local dex scan of all 9 mediatek-*
++# boot jars found offending packages in this jar only; the other 8 are
++# covered by the com\.mediatek entries above.
++com\.antaiui
++com\.antaiui\.internal

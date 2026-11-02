@@ -1,0 +1,54 @@
+diff --git a/prebuilts/api/202504/202504_general_sepolicy.conf b/prebuilts/api/202504/202504_general_sepolicy.conf
+index e50a477..6e072d2 100644
+--- a/prebuilts/api/202504/202504_general_sepolicy.conf
++++ b/prebuilts/api/202504/202504_general_sepolicy.conf
+@@ -1593,7 +1593,7 @@ neverallow { domain            } bpffs_type:dir ~{ add_name create getattr mount
+ neverallow { domain -bpfloader } bpffs_type:dir { add_name create open read remove_name setattr write };
+ neverallow { domain            } bpffs_type:file ~{ create getattr map open read rename setattr write };
+ neverallow { domain -bpfloader } bpffs_type:file { create map open rename setattr };
+-neverallow { domain -bpfloader -gpuservice -lmkd -mediaprovider_app -netd -netutils_wrapper                -system_server } fs_bpf:file               { getattr read };
++neverallow { domain -bpfloader -gpuservice -lmkd -mediaprovider_app -netd -netutils_wrapper -network_stack -system_server } fs_bpf:file               { getattr read };
+ neverallow { domain -bpfloader                                                                                            } fs_bpf_loader:file        { getattr read };
+ neverallow { domain -bpfloader                                                              -network_stack                } fs_bpf_net_private:file   { getattr read };
+ neverallow { domain -bpfloader                                                              -network_stack -system_server } fs_bpf_net_shared:file    { getattr read };
+diff --git a/prebuilts/api/202504/private/bpfloader.te b/prebuilts/api/202504/private/bpfloader.te
+index 7d8a706..b4441fb 100644
+--- a/prebuilts/api/202504/private/bpfloader.te
++++ b/prebuilts/api/202504/private/bpfloader.te
+@@ -34,7 +34,7 @@ neverallow { domain -bpfloader } bpffs_type:dir { add_name create open read remo
+ 
+ neverallow { domain            } bpffs_type:file ~{ create getattr map open read rename setattr write };
+ neverallow { domain -bpfloader } bpffs_type:file { create map open rename setattr };
+-neverallow { domain -bpfloader -gpuservice -lmkd -mediaprovider_app -netd -netutils_wrapper                -system_server } fs_bpf:file               { getattr read };
++neverallow { domain -bpfloader -gpuservice -lmkd -mediaprovider_app -netd -netutils_wrapper -network_stack -system_server } fs_bpf:file               { getattr read };
+ neverallow { domain -bpfloader                                                                                            } fs_bpf_loader:file        { getattr read };
+ neverallow { domain -bpfloader                                                              -network_stack                } fs_bpf_net_private:file   { getattr read };
+ neverallow { domain -bpfloader                                                              -network_stack -system_server } fs_bpf_net_shared:file    { getattr read };
+diff --git a/private/bpfloader.te b/private/bpfloader.te
+index 968fb03..2be16dd 100644
+--- a/private/bpfloader.te
++++ b/private/bpfloader.te
+@@ -49,7 +49,7 @@ neverallow { domain -bpfloader } bpffs_type:dir { add_name create open read remo
+ 
+ neverallow { domain            } bpffs_type:file ~{ create getattr map open read rename setattr write };
+ neverallow { domain -bpfloader } bpffs_type:file { create map open rename setattr };
+-neverallow { domain -bpfloader -gpuservice -lmkd -mediaprovider_app -netd -netutils_wrapper                -system_server                             } fs_bpf:file                { getattr read };
++neverallow { domain -bpfloader -gpuservice -lmkd -mediaprovider_app -netd -netutils_wrapper -network_stack -system_server                             } fs_bpf:file                { getattr read };
+ neverallow { domain -bpfloader                                                                             -system_server -traced_probes              } fs_bpf_cputimeinstate:file { getattr read write };
+ neverallow { domain -bpfloader                                                                                                                        } fs_bpf_loader:file         { getattr read };
+ neverallow { domain -bpfloader                                                              -network_stack                                            } fs_bpf_net_private:file    { getattr read };
+diff --git a/private/network_stack.te b/private/network_stack.te
+index 4146519..70f9332 100644
+--- a/private/network_stack.te
++++ b/private/network_stack.te
+@@ -81,8 +81,8 @@ hal_client_domain(network_stack, hal_tetheroffload)
+ allow network_stack self:netlink_netfilter_socket create_socket_perms_no_ioctl;
+ allow network_stack network_stack_service:service_manager find;
+ # allow Tethering(network_stack process) to run/update/read the eBPF maps to offload tethering traffic by eBPF.
+-allow network_stack { fs_bpf_net_private fs_bpf_net_shared fs_bpf_netd_readonly fs_bpf_netd_shared fs_bpf_tethering }:dir search;
+-allow network_stack { fs_bpf_net_private fs_bpf_net_shared fs_bpf_netd_readonly fs_bpf_netd_shared fs_bpf_tethering }:file { getattr read write };
++allow network_stack { fs_bpf fs_bpf_net_private fs_bpf_net_shared fs_bpf_netd_readonly fs_bpf_netd_shared fs_bpf_tethering }:dir search;
++allow network_stack { fs_bpf fs_bpf_net_private fs_bpf_net_shared fs_bpf_netd_readonly fs_bpf_netd_shared fs_bpf_tethering }:file { getattr read write };
+ allow network_stack bpfloader:bpf prog_run;
+ allow network_stack self:bpf map_create;
+ allow network_stack { bpfloader netd network_stack system_server }:bpf { map_read map_write };

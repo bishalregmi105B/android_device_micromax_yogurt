@@ -1,5 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <carrier_config_list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Nepal: Ncell (429-02) and Nepal Telecom (429-01) run VoLTE; AOSP ships no config for them,
+         which leaves carrier_volte_available_bool=false and IMS never registers. -->
+    <carrier_config mcc="429" mnc="02">
+        <boolean name="carrier_volte_available_bool" value="true"/>
+        <boolean name="carrier_volte_provisioning_required_bool" value="false"/>
+        <boolean name="carrier_volte_provisioned_bool" value="true"/>
+        <boolean name="editable_enhanced_4g_lte_bool" value="true"/>
+        <boolean name="enhanced_4g_lte_on_by_default_bool" value="true"/>
+        <boolean name="hide_enhanced_4g_lte_bool" value="false"/>
+        <boolean name="carrier_volte_override_wfc_provisioning_bool" value="false"/>
+    </carrier_config>
+    <carrier_config mcc="429" mnc="01">
+        <boolean name="carrier_volte_available_bool" value="true"/>
+        <boolean name="carrier_volte_provisioning_required_bool" value="false"/>
+        <boolean name="carrier_volte_provisioned_bool" value="true"/>
+        <boolean name="editable_enhanced_4g_lte_bool" value="true"/>
+        <boolean name="enhanced_4g_lte_on_by_default_bool" value="true"/>
+        <boolean name="hide_enhanced_4g_lte_bool" value="false"/>
+    </carrier_config>
     <carrier_config mcc="460" mnc="11">
         <int name="mtk_cdma_sms_7bit_encoding_type_int" value="2"/>
     </carrier_config>

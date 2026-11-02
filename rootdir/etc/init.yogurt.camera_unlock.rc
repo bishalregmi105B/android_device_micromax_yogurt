@@ -1,0 +1,20 @@
+# init.yogurt.camera_unlock.rc — 2026-10-25
+# Removes the per-app whitelist gate vendor.camera.aux.packagelist so ANY
+# camera app (system DerpFest camera / Aperture and third-party apps) opens
+# the full device set incl. the logical multi camera (48 MP remosaic composite).
+# Evidence: stock value was
+#   vendor.camera.aux.packagelist =
+#     com.android.camera,com.google.camera,net.sourceforge.opencamera,org.lineageos.aperture
+# (recon/live_audit/fp_props.txt). The HAL reads this prop per client package.
+# We set the value three times so a vendor rc or build.prop ordering can never
+# restore the whitelist after us; HAL reads happen per client open, all of
+# which occur after post-fs-data.
+
+on early-init
+    setprop vendor.camera.aux.packagelist "*"
+
+on late-init
+    setprop vendor.camera.aux.packagelist "*"
+
+on post-fs-data
+    setprop vendor.camera.aux.packagelist "*"

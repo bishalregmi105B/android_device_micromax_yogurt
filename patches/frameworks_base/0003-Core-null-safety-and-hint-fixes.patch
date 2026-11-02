@@ -1,0 +1,147 @@
+diff --git a/core/java/android/app/SystemServiceRegistry.java b/core/java/android/app/SystemServiceRegistry.java
+index 1898f4242..a7a03c6af 100644
+--- a/core/java/android/app/SystemServiceRegistry.java
++++ b/core/java/android/app/SystemServiceRegistry.java
+@@ -2151,6 +2151,8 @@ public final class SystemServiceRegistry {
+                         return null;
+                     }
+                     break;
++                case Context.AX_SANDBOX_SERVICE:
++                    return null;
+             }
+             // TODO (b/404593897): make it a case of the switch statement above when the flag is
+             //  removed.
+diff --git a/core/java/android/database/sqlite/SQLiteTokenizer.java b/core/java/android/database/sqlite/SQLiteTokenizer.java
+index 7e7c3fb97..df7f46a2c 100644
+--- a/core/java/android/database/sqlite/SQLiteTokenizer.java
++++ b/core/java/android/database/sqlite/SQLiteTokenizer.java
+@@ -105,7 +105,9 @@ public class SQLiteTokenizer {
+                 final int end = pos;
+ 
+                 final String token = sql.substring(start, end);
+-                checker.accept(token);
++                if (checker != null) {
++                    checker.accept(token);
++                }
+ 
+                 continue;
+             }
+@@ -142,7 +144,9 @@ public class SQLiteTokenizer {
+                     } else {
+                         token = tokenUnquoted;
+                     }
+-                    checker.accept(token);
++                    if (checker != null) {
++                        checker.accept(token);
++                    }
+                 } else {
+                     if ((options &= OPTION_TOKEN_ONLY) != 0) {
+                         throw genException("Non-token detected", sql);
+@@ -164,7 +168,9 @@ public class SQLiteTokenizer {
+ 
+                 final String token = sql.substring(quoteStart + 1, quoteEnd);
+ 
+-                checker.accept(token);
++                if (checker != null) {
++                    checker.accept(token);
++                }
+                 continue;
+             }
+             if ((options &= OPTION_TOKEN_ONLY) != 0) {
+diff --git a/services/core/java/com/android/server/power/hint/HintManagerService.java b/services/core/java/com/android/server/power/hint/HintManagerService.java
+index 9174855b6..a31ee301e 100644
+--- a/services/core/java/com/android/server/power/hint/HintManagerService.java
++++ b/services/core/java/com/android/server/power/hint/HintManagerService.java
+@@ -325,14 +325,19 @@ public final class HintManagerService extends SystemService {
+                 LocalServices.getService(ActivityManagerInternal.class));
+         mPowerHal = injector.createIPower();
+         mPowerHalVersion = 0;
+-        mVendorApiLevel = Integer.parseInt(SystemProperties.get(PROPERTY_VENDOR_API_LEVEL, ""));
++        String apiLevelStr = SystemProperties.get(PROPERTY_VENDOR_API_LEVEL, "29");
++        int vendorApiLevel = 29;
++        try {
++            vendorApiLevel = apiLevelStr.isEmpty() ? 29 : Integer.parseInt(apiLevelStr);
++        } catch (NumberFormatException e) {
++            vendorApiLevel = 29;
++        }
++        mVendorApiLevel = vendorApiLevel;
+         mUsesFmq = false;
+-        if (mPowerHal != null) {
+-            try {
+-                mSupportInfo = getSupportInfo();
+-            } catch (RemoteException e) {
+-                throw new IllegalStateException("Could not contact PowerHAL!", e);
+-            }
++        try {
++            mSupportInfo = getSupportInfo();
++        } catch (RemoteException e) {
++            throw new IllegalStateException("Could not contact PowerHAL!", e);
+         }
+         if (mSupportInfo.headroom.isCpuSupported) {
+             mCpuHeadroomCache = new HeadroomCache<>(2, mSupportInfo.headroom.cpuMinIntervalMillis);
+@@ -365,13 +370,15 @@ public final class HintManagerService extends SystemService {
+     }
+ 
+     SupportInfo getSupportInfo() throws RemoteException {
+-        try {
+-            mPowerHalVersion = mPowerHal.getInterfaceVersion();
+-            if (mPowerHalVersion >= 6) {
+-                return mPowerHal.getSupportInfo();
++        if (mPowerHal != null) {
++            try {
++                mPowerHalVersion = mPowerHal.getInterfaceVersion();
++                if (mPowerHalVersion >= 6) {
++                    return mPowerHal.getSupportInfo();
++                }
++            } catch (RemoteException e) {
++                throw new IllegalStateException("Could not contact PowerHAL!", e);
+             }
+-        } catch (RemoteException e) {
+-            throw new IllegalStateException("Could not contact PowerHAL!", e);
+         }
+ 
+         SupportInfo supportInfo = new SupportInfo();
+diff --git a/services/core/java/com/android/server/security/FileIntegrity.java b/services/core/java/com/android/server/security/FileIntegrity.java
+index b8f187e0e..f208ef78f 100644
+--- a/services/core/java/com/android/server/security/FileIntegrity.java
++++ b/services/core/java/com/android/server/security/FileIntegrity.java
+@@ -46,6 +46,9 @@ public final class FileIntegrity {
+      */
+     @SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+     public static void setUpFsVerity(@NonNull File file) throws IOException {
++        if (!VerityUtils.isFsVeritySupported()) {
++            return;
++        }
+         try (ParcelFileDescriptor pfd = ParcelFileDescriptor.open(file, MODE_READ_ONLY)) {
+             setUpFsVerity(pfd);
+         }
+@@ -63,6 +66,9 @@ public final class FileIntegrity {
+     @SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+     public static void setUpFsVerity(@NonNull ParcelFileDescriptor parcelFileDescriptor)
+             throws IOException {
++        if (!VerityUtils.isFsVeritySupported()) {
++            return;
++        }
+         VerityUtils.setUpFsverity(parcelFileDescriptor.getFd());
+     }
+ }
+diff --git a/telephony/java/android/telephony/SubscriptionManager.java b/telephony/java/android/telephony/SubscriptionManager.java
+index 8b926fadb..644ea2915 100644
+--- a/telephony/java/android/telephony/SubscriptionManager.java
++++ b/telephony/java/android/telephony/SubscriptionManager.java
+@@ -4957,4 +4957,15 @@ public class SubscriptionManager {
+             throw ex.rethrowFromSystemServer();
+         }
+     }
++
++    /**
++     * Legacy compatibility helper for vendor telephony/IMS stacks.
++     *
++     * @param slotIndex The SIM slot index.
++     * @return The SIM state constant from {@link TelephonyManager}.
++     * @hide
++     */
++    public static int getSimStateForSlotIndex(int slotIndex) {
++        return TelephonyManager.getSimStateForSlotIndex(slotIndex);
++    }
+ }

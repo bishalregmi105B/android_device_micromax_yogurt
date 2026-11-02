@@ -1,0 +1,7 @@
+# sepolicy/camera_prop.te — staged companion to init.yogurt.camera_unlock.rc
+# Allows init's property service to set the vendor camera prop at boot.
+# If the synced tree's property_contexts already labels vendor.camera.* to a
+# type init may set, this file can shrink to nothing — resolve against the
+# synced property_contexts during P5 §6, never by guessing.
+
+allow init vendor_camera_prop:property_service set;

@@ -7,4 +7,11 @@
     <string-array name="config_ignoredAuxCameraIds">
         <item>23</item>
     </string-array>
+
+    <!-- Enable 60 FPS video recording on FHD (1080p) -->
+    <string-array name="config_additionalVideoConfigurations" translatable="false">
+        <item>0</item>
+        <item>fhd</item>
+        <item>60</item>
+    </string-array>
 </resources>

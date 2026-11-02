@@ -1,0 +1,23 @@
+diff --git a/src/com/android/providers/contacts/util/SelectionBuilder.java b/src/com/android/providers/contacts/util/SelectionBuilder.java
+index e21e2e2..f153f50 100644
+--- a/src/com/android/providers/contacts/util/SelectionBuilder.java
++++ b/src/com/android/providers/contacts/util/SelectionBuilder.java
+@@ -45,7 +45,17 @@ public class SelectionBuilder {
+      */
+     public SelectionBuilder addClause(String clause) {
+         if (!TextUtils.isEmpty(clause)) {
+-            SQLiteTokenizer.tokenize(clause, SQLiteTokenizer.OPTION_CHECK_BRACKETS, null);
++            // [build-ledger wall 11, 2026-10-27] Fork-skew: frameworks/base
++            // (codeberg DerpFest-AOSP snapshot) carries the 2019-era
++            // SQLiteTokenizer, which defines only OPTION_NONE / OPTION_TOKEN_ONLY;
++            // the upstream OPTION_CHECK_BRACKETS (added later, used by this file's
++            // Lineage fork) is absent, so javac could not resolve it
++            // (build_first_20261027_114144.log, single error). OPTION_NONE is this
++            // framework revision's historical behavior for addClause - tokens
++            // validated, comments/semicolons rejected, brackets/parens ignored -
++            // so the clause add path is unchanged; only the newer bracket-balance
++            // validation is unavailable. Framework unchanged (zero blast radius).
++            SQLiteTokenizer.tokenize(clause, SQLiteTokenizer.OPTION_NONE, token -> {});
+             mWhereClauses.add(clause);
+         }
+         return this;

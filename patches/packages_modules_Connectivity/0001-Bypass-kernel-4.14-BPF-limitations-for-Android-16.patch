@@ -1,0 +1,191 @@
+diff --git a/bpf/loader/NetBpfLoad.cpp b/bpf/loader/NetBpfLoad.cpp
+index 7a4389f..77c42a4 100644
+--- a/bpf/loader/NetBpfLoad.cpp
++++ b/bpf/loader/NetBpfLoad.cpp
+@@ -1058,8 +1058,7 @@ static int validateProg(const borrowed_fd& fd, const char* const progPinLoc) {
+     ALOGI("prog %s id %d len jit:%d xlat:%d", progPinLoc, progId, jitLen, xlatLen);
+ 
+     if (!jitLen && api_level_full >= BPFLOADER_MAINLINE_25Q2_VERSION) {
+-        ALOGE("Kernel eBPF JIT failure for %s", progPinLoc);
+-        return -ENOTSUP;
++        ALOGW("Kernel eBPF JIT disabled or unavailable for %s", progPinLoc);
+     }
+     return 0;
+ }
+@@ -1387,7 +1386,7 @@ static bool loadObject(const char* const progPath, const bool useLibbpf = false)
+ #define BPFROOT APEXROOT "/etc/bpf/mainline/"
+ 
+ static bool loadAllObjects() {
+-    bool libbpf = isAtLeast26Q1 || useLibBpf;
++    bool libbpf = (isAtLeast26Q1 || useLibBpf) && isAtLeastKernelVersion(4, 19);
+     if (!loadObject(BPFROOT "offload.o")) return false;
+     if (!loadObject(BPFROOT "test.o", libbpf)) return false;
+     if (isAtLeastT) {
+@@ -1620,22 +1619,19 @@ static int doLoad(char** argv, char * const envp[]) {
+     // V bumps the kernel requirement up to 4.19
+     // see also: //system/netd/tests/kernel_test.cpp TestKernel419
+     if (isAtLeastV && !isAtLeastKernelVersion(4, 19)) {
+-        ALOGE("Android V requires kernel 4.19.");
+-        return 5;
++        ALOGW("Android V officially requires kernel 4.19 (running in legacy 4.14+ mode).");
+     }
+ 
+     // 25Q2 bumps the kernel requirement up to 5.4
+     // see also: //system/netd/tests/kernel_test.cpp TestKernel54
+     if (isAtLeast25Q2 && !isAtLeastKernelVersion(5, 4)) {
+-        ALOGE("Android 25Q2 requires kernel 5.4.");
+-        return 6;
++        ALOGW("Android 25Q2 officially requires kernel 5.4 (running in legacy 4.14+ mode).");
+     }
+ 
+     // 25Q4 bumps the kernel requirement up to 5.10
+     // see also: //system/netd/tests/kernel_test.cpp TestKernel510
+     if (isAtLeast25Q4 && !isAtLeastKernelVersion(5, 4)) {
+-        ALOGE("Android 25Q4 requires kernel 5.4.");
+-        return 7;
++        ALOGW("Android 25Q4 officially requires kernel 5.4 (running in legacy 4.14+ mode).");
+     }
+ 
+     // Technically already required by U, but only enforce on V+
+@@ -1795,12 +1791,16 @@ static int doLoad(char** argv, char * const envp[]) {
+         //  kernel does not have CONFIG_BPF_JIT=y)
+         // BPF_JIT is required by R VINTF (which means 4.14/4.19/5.4 kernels),
+         // but 4.14/4.19 were released with P & Q, and only 5.4 is new in R+.
+-        if (!writeFile("/proc/sys/net/core/bpf_jit_enable", "1\n")) return 24;
++        if (!writeFile("/proc/sys/net/core/bpf_jit_enable", "1\n")) {
++            ALOGW("Failed to write /proc/sys/net/core/bpf_jit_enable (CONFIG_BPF_JIT not set?)");
++        }
+ 
+         // Enable JIT kallsyms export for privileged users only
+         // (Note: this (open) will fail with ENOENT 'No such file or directory' if
+         //  kernel does not have CONFIG_HAVE_EBPF_JIT=y)
+-        if (!writeFile("/proc/sys/net/core/bpf_jit_kallsyms", "1\n")) return 25;
++        if (!writeFile("/proc/sys/net/core/bpf_jit_kallsyms", "1\n")) {
++            ALOGW("Failed to write /proc/sys/net/core/bpf_jit_kallsyms (CONFIG_BPF_JIT not set?)");
++        }
+     }
+ 
+     // Create all the pin subdirectories
+diff --git a/bpf/netd/BpfHandler.cpp b/bpf/netd/BpfHandler.cpp
+index 7367ec5..6ebd41a 100644
+--- a/bpf/netd/BpfHandler.cpp
++++ b/bpf/netd/BpfHandler.cpp
+@@ -98,12 +98,12 @@ static Status initPrograms(const char* cg2_path) {
+ 
+     // V bumps the kernel requirement up to 4.19
+     if (isAtLeastV && !isAtLeastKernelVersion(4, 19)) {
+-        return Status("V+ platform with kernel version < 4.19.0 is unsupported");
++        ALOGW("V+ platform with kernel version < 4.19.0 (running in legacy 4.14+ mode)");
+     }
+ 
+     // 25Q2 bumps the kernel requirement up to 5.4
+     if (isAtLeast25Q2 && !isAtLeastKernelVersion(5, 4)) {
+-        return Status("25Q2+ platform with kernel version < 5.4.0 is unsupported");
++        ALOGW("25Q2+ platform with kernel version < 5.4.0 (running in legacy 4.14+ mode)");
+     }
+ 
+     unique_fd cg_fd(open(cg2_path, O_DIRECTORY | O_RDONLY | O_CLOEXEC));
+diff --git a/bpf/progs/offload.c b/bpf/progs/offload.c
+index 4e82d01..c71d878 100644
+--- a/bpf/progs/offload.c
++++ b/bpf/progs/offload.c
+@@ -302,24 +302,27 @@ DEFINE_BPF_PROG_KVER(schedcls, tether_upstream6_rawip, 5_4, AID_NETWORK_STACK, 5
+     return do_forward6(skb, RAWIP, UPSTREAM, KVER_5_4);
+ }
+ 
+-// and for 4.14/4.19 kernels
+-DEFINE_BPF_PROG_KVER_RANGE(schedcls, tether_downstream6_rawip, 4_14, AID_NETWORK_STACK, 4_14, 5_4)
++// and for 4.14/4.19 (R+) kernels -- optional so 4.14/4.19 (P/Q) kernels without
++// BPF_FUNC_skb_change_head enabled for TC programs fall back to the stubs below.
++DEFINE_OPTIONAL_BPF_PROG_KVER_RANGE(schedcls, tether_downstream6_rawip, 4_14,
++                                    AID_NETWORK_STACK, 4_14, 5_4)
+ (struct __sk_buff* skb) {
+     return do_forward6(skb, RAWIP, DOWNSTREAM, KVER_4_14);
+ }
+ 
+-DEFINE_BPF_PROG_KVER_RANGE(schedcls, tether_upstream6_rawip, 4_14, AID_NETWORK_STACK, 4_14, 5_4)
++DEFINE_OPTIONAL_BPF_PROG_KVER_RANGE(schedcls, tether_upstream6_rawip, 4_14,
++                                    AID_NETWORK_STACK, 4_14, 5_4)
+ (struct __sk_buff* skb) {
+     return do_forward6(skb, RAWIP, UPSTREAM, KVER_4_14);
+ }
+ 
+-// and define no-op stubs for pre-4.14 kernels.
+-DEFINE_BPF_PROG_KVER_RANGE(schedcls, tether_downstream6_rawip, stub, AID_NETWORK_STACK, 4_9, 4_14)
++// and define no-op stubs for pre-5.4 (4.9-P/Q, 4.14-P/Q, 4.19-Q) kernels.
++DEFINE_BPF_PROG_KVER_RANGE(schedcls, tether_downstream6_rawip, stub, AID_NETWORK_STACK, 4_9, 5_4)
+ (__unused struct __sk_buff* skb) {
+     return TC_ACT_PIPE;
+ }
+ 
+-DEFINE_BPF_PROG_KVER_RANGE(schedcls, tether_upstream6_rawip, stub, AID_NETWORK_STACK, 4_9, 4_14)
++DEFINE_BPF_PROG_KVER_RANGE(schedcls, tether_upstream6_rawip, stub, AID_NETWORK_STACK, 4_9, 5_4)
+ (__unused struct __sk_buff* skb) {
+     return TC_ACT_PIPE;
+ }
+diff --git a/service/jni/com_android_server_connectivity_ClatCoordinator.cpp b/service/jni/com_android_server_connectivity_ClatCoordinator.cpp
+index 70991eb..a892f75 100644
+--- a/service/jni/com_android_server_connectivity_ClatCoordinator.cpp
++++ b/service/jni/com_android_server_connectivity_ClatCoordinator.cpp
+@@ -36,6 +36,7 @@
+ #include <android-modules-utils/sdk_level.h>
+ #include <bpf/BpfMap.h>
+ #include <bpf/BpfUtils.h>
++#include <bpf/KernelUtils.h>
+ #include <netjniutils/netjniutils.h>
+ #include <private/android_filesystem_config.h>
+ 
+@@ -71,7 +72,11 @@ static void verifyPerms(const char * const path,
+     char b[255] = {};
+     int v = lgetxattr(path, "security.selinux", &b, sizeof(b));
+     if (v < 0) ALOGF("lgetxattr '%s' errno=%d", path, errno);
+-    if (strncmp(ctxt, b, sizeof(b))) ALOGF("context of '%s' is '%s' != '%s'", path, b, ctxt);
++    // Kernel < 4.19 bpffs does not support subdirectory genfscon labels (everything is fs_bpf)
++    if (strncmp(ctxt, b, sizeof(b)) &&
++        (strncmp(path, "/sys/fs/bpf/", 12) || strncmp("u:object_r:fs_bpf:s0", b, sizeof(b)))) {
++        ALOGF("context of '%s' is '%s' != '%s'", path, b, ctxt);
++    }
+ 
+     int fd = -1;
+ 
+@@ -101,6 +106,9 @@ static void verifyClatPerms() {
+     // We might run as part of tests instead of as part of system server
+     if (getuid() != AID_SYSTEM) return;
+ 
++    // Kernel < 4.19 bpffs lacks per-directory genfscon and clat eBPF support
++    if (!bpf::isAtLeastKernelVersion(4, 19)) return;
++
+     // First verify the clatd directory and binary,
+     // since this is built into the apex file system image,
+     // failures here are 99% likely to be build problems.
+diff --git a/staticlibs/device/com/android/net/module/util/SingleWriterBpfMap.java b/staticlibs/device/com/android/net/module/util/SingleWriterBpfMap.java
+index a638cc4..f62696f 100644
+--- a/staticlibs/device/com/android/net/module/util/SingleWriterBpfMap.java
++++ b/staticlibs/device/com/android/net/module/util/SingleWriterBpfMap.java
+@@ -144,4 +144,12 @@ public class SingleWriterBpfMap<K extends Struct, V extends Struct> extends BpfM
+     public synchronized V getValue(@NonNull K key) throws ErrnoException {
+         return mCache.get(key);
+     }
++
++    @Override
++    public synchronized void clear() throws ErrnoException {
++        for (K key : new java.util.ArrayList<>(mCache.keySet())) {
++            deleteEntry(key);
++        }
++        super.clear();
++    }
+ }
+diff --git a/staticlibs/native/bpfmapjni/com_android_net_module_util_Bpf.cpp b/staticlibs/native/bpfmapjni/com_android_net_module_util_Bpf.cpp
+index 055caa2..5761a25 100644
+--- a/staticlibs/native/bpfmapjni/com_android_net_module_util_Bpf.cpp
++++ b/staticlibs/native/bpfmapjni/com_android_net_module_util_Bpf.cpp
+@@ -90,7 +90,8 @@ static void com_android_net_module_util_BpfMap_nativeWriteToMapEntry(JNIEnv *env
+ static jboolean throwIfNotEnoent(JNIEnv *env, const char* functionName, int ret, int err) {
+     if (ret == 0) return true;
+ 
+-    if (err != ENOENT) jniThrowErrnoException(env, functionName, err);
++    // Kernel < 4.16 BPF_MAP_TYPE_LPM_TRIE returns ENOTSUPP (524) for BPF_MAP_GET_NEXT_KEY
++    if (err != ENOENT && err != 524) jniThrowErrnoException(env, functionName, err);
+     return false;
+ }
+ 

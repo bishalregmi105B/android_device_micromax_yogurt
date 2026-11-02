@@ -1,0 +1,435 @@
+diff --git a/Android.bp b/Android.bp
+index b5e8617..16d290c 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -410,10 +410,20 @@ cc_defaults {
+ 
+     srcs: [
+         "aosp/boot_control_android.cc",
++        "aosp/boot_control_recovery.cc",
+         "aosp/cleanup_previous_update_action.cc",
+         "aosp/dynamic_partition_control_android.cc",
+         "aosp/dynamic_partition_utils.cc",
+     ],
++
++    // update_engine_sideload (the recovery variant) uses the single-slot,
++    // HAL-free BootControlRecovery instead of the AIDL/HIDL boot-control HAL
++    // client: the recovery ramdisk on this non-A/B device ships no HAL.
++    target: {
++        recovery: {
++            cflags: ["-DUE_NON_AB_RECOVERY"],
++        },
++    },
+ }
+ 
+ cc_library_static {
+diff --git a/aosp/boot_control_android.cc b/aosp/boot_control_android.cc
+index 343be9f..7cf0def 100644
+--- a/aosp/boot_control_android.cc
++++ b/aosp/boot_control_android.cc
+@@ -14,11 +14,15 @@
+ // limitations under the License.
+ //
+ 
++// The Android flavour of update_engine (the daemon) uses the AIDL/HIDL
++// boot-control HAL client (BootControlAndroid). The recovery flavour instead
++// uses BootControlRecovery (boot_control_recovery.cc): update_engine_sideload
++// is built with -DUE_NON_AB_RECOVERY, and that macro compiles this entire TU
++// out so the recovery ramdisk stays HAL-free on this single-slot non-A/B
++// device (DerpFest 16.2 on yogurt).
++#ifndef UE_NON_AB_RECOVERY
+ #include "update_engine/aosp/boot_control_android.h"
+ 
+-#include <memory>
+-#include <utility>
+-
+ #include <base/bind.h>
+ #include <base/logging.h>
+ #include <bootloader_message/bootloader_message.h>
+@@ -177,4 +181,7 @@ std::optional<PartitionDevice> BootControlAndroid::GetPartitionDevice(
+   return dynamic_control_->GetPartitionDevice(
+       partition_name, slot, current_slot, not_in_payload);
+ }
++
+ }  // namespace chromeos_update_engine
++
++#endif  // UE_NON_AB_RECOVERY
+diff --git a/aosp/boot_control_recovery.cc b/aosp/boot_control_recovery.cc
+new file mode 100644
+index 0000000..dd27412
+--- /dev/null
++++ b/aosp/boot_control_recovery.cc
+@@ -0,0 +1,135 @@
++//
++// Copyright (C) 2026 The DerpFest Project (yogurt single-slot recovery build)
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//      http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++
++// Recovery flavour ONLY. In the recovery ramdisk there is no IBootControl
++// HAL service (and the bootloader keeps no slot metadata on this device), so
++// update_engine_sideload is built with -DUE_NON_AB_RECOVERY to provide a
++// single-slot BootControlRecovery that needs no HAL. In the daemon flavour
++// this TU compiles to nothing, and BootControlAndroid keeps serving the
++// HAL-based implementation.
++
++#ifdef UE_NON_AB_RECOVERY
++
++#include "update_engine/aosp/boot_control_recovery.h"
++
++#include <utility>
++
++namespace chromeos_update_engine {
++
++using Slot = BootControlInterface::Slot;
++
++namespace boot_control {
++
++// Factory declared in update_engine/aosp/boot_control.h. The recovery
++// flavour of the engine picks this over BootControlAndroid.
++std::unique_ptr<BootControlInterface> CreateBootControl() {
++  auto boot_control = std::make_unique<BootControlRecovery>();
++  if (!boot_control->Init()) {
++    return nullptr;
++  }
++  return std::move(boot_control);
++}
++
++}  // namespace boot_control
++
++bool BootControlRecovery::Init() {
++  dynamic_control_ =
++      std::make_unique<DynamicPartitionControlAndroid>(GetCurrentSlot());
++  return true;
++}
++
++unsigned int BootControlRecovery::GetNumSlots() const {
++  return 1;
++}
++
++BootControlInterface::Slot BootControlRecovery::GetCurrentSlot() const {
++  return 0;
++}
++
++std::optional<PartitionDevice> BootControlRecovery::GetPartitionDevice(
++    const std::string& partition_name,
++    uint32_t slot,
++    uint32_t current_slot,
++    bool not_in_payload) const {
++  return dynamic_control_->GetPartitionDevice(
++      partition_name, slot, current_slot, not_in_payload);
++}
++
++bool BootControlRecovery::GetPartitionDevice(const std::string& partition_name,
++                                             Slot slot,
++                                             bool not_in_payload,
++                                             std::string* device,
++                                             bool* is_dynamic) const {
++  auto partition_dev = dynamic_control_->GetPartitionDevice(
++      partition_name, slot, GetCurrentSlot(), not_in_payload);
++  if (!partition_dev.has_value()) {
++    return false;
++  }
++  if (device) {
++    *device = std::move(partition_dev->rw_device_path);
++  }
++  if (is_dynamic) {
++    *is_dynamic = partition_dev->is_dynamic;
++  }
++  return true;
++}
++
++bool BootControlRecovery::GetPartitionDevice(const std::string& partition_name,
++                                             Slot slot,
++                                             std::string* device) const {
++  return GetPartitionDevice(
++      partition_name, slot, false /* not_in_payload */, device, nullptr);
++}
++
++bool BootControlRecovery::IsSlotBootable(Slot /*slot*/) const {
++  // Single slot: always bootable.
++  return true;
++}
++
++bool BootControlRecovery::MarkSlotUnbootable(Slot /*slot*/) {
++  // Single slot: nothing to mark.
++  return true;
++}
++
++bool BootControlRecovery::SetActiveBootSlot(Slot /*slot*/) {
++  // Single slot: no slot switching to perform.
++  return true;
++}
++
++Slot BootControlRecovery::GetActiveBootSlot() {
++  return 0;
++}
++
++bool BootControlRecovery::MarkBootSuccessfulAsync(
++    base::Callback<void(bool)> callback) {
++  // Single slot: report success to the caller immediately.
++  callback.Run(true);
++  return true;
++}
++
++bool BootControlRecovery::IsSlotMarkedSuccessful(Slot /*slot*/) const {
++  // Single slot: always considered successful.
++  return true;
++}
++
++DynamicPartitionControlInterface*
++BootControlRecovery::GetDynamicPartitionControl() {
++  return dynamic_control_.get();
++}
++
++}  // namespace chromeos_update_engine
++
++#endif  // UE_NON_AB_RECOVERY
+diff --git a/aosp/boot_control_recovery.h b/aosp/boot_control_recovery.h
+new file mode 100644
+index 0000000..11406e1
+--- /dev/null
++++ b/aosp/boot_control_recovery.h
+@@ -0,0 +1,84 @@
++//
++// Copyright (C) 2026 The DerpFest Project (yogurt single-slot recovery build)
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//      http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++
++#ifndef UPDATE_ENGINE_AOSP_BOOT_CONTROL_RECOVERY_H_
++#define UPDATE_ENGINE_AOSP_BOOT_CONTROL_RECOVERY_H_
++
++#include <memory>
++#include <optional>
++#include <string>
++
++#include <android-base/macros.h>
++#include <base/callback.h>
++
++#include "update_engine/aosp/dynamic_partition_control_android.h"
++#include "update_engine/common/boot_control_interface.h"
++#include "update_engine/common/dynamic_partition_control_interface.h"
++
++namespace chromeos_update_engine {
++
++// Single-slot, HAL-free implementation of BootControlInterface for non-A/B
++// ("half-A/B" MTK) devices: the recovery ramdisk has no IBootControl HAL
++// service, and the bootloader has no slot metadata (misc is all zeros).
++// The device is treated as having exactly one slot (0); all slot-flag
++// operations are no-ops. Partition device lookup is delegated to
++// DynamicPartitionControlAndroid, which maps the unsuffixed logical
++// partitions in super (system/vendor/product) itself.
++//
++// Build note: this class is only linked into the recovery flavour of the
++// engine (update_engine_sideload), where UE_NON_AB_RECOVERY is defined; the
++// in-system daemon keeps using BootControlAndroid + the boot-control HAL.
++class BootControlRecovery final : public BootControlInterface {
++ public:
++  BootControlRecovery() = default;
++  ~BootControlRecovery() = default;
++
++  // Constructs DynamicPartitionControlAndroid; never fails.
++  bool Init();
++
++  // BootControlInterface overrides.
++  unsigned int GetNumSlots() const override;
++  BootControlInterface::Slot GetCurrentSlot() const override;
++  bool GetPartitionDevice(const std::string& partition_name,
++                          BootControlInterface::Slot slot,
++                          bool not_in_payload,
++                          std::string* device,
++                          bool* is_dynamic) const override;
++  bool GetPartitionDevice(const std::string& partition_name,
++                          BootControlInterface::Slot slot,
++                          std::string* device) const override;
++  std::optional<PartitionDevice> GetPartitionDevice(
++      const std::string& partition_name,
++      uint32_t slot,
++      uint32_t current_slot,
++      bool not_in_payload = false) const override;
++  bool IsSlotBootable(BootControlInterface::Slot slot) const override;
++  bool MarkSlotUnbootable(BootControlInterface::Slot slot) override;
++  bool SetActiveBootSlot(BootControlInterface::Slot slot) override;
++  bool MarkBootSuccessfulAsync(base::Callback<void(bool)> callback) override;
++  bool IsSlotMarkedSuccessful(BootControlInterface::Slot slot) const override;
++  BootControlInterface::Slot GetActiveBootSlot() override;
++  DynamicPartitionControlInterface* GetDynamicPartitionControl() override;
++
++ private:
++  std::unique_ptr<DynamicPartitionControlAndroid> dynamic_control_;
++
++  DISALLOW_COPY_AND_ASSIGN(BootControlRecovery);
++};
++
++}  // namespace chromeos_update_engine
++
++#endif  // UPDATE_ENGINE_AOSP_BOOT_CONTROL_RECOVERY_H_
+diff --git a/aosp/dynamic_partition_control_android.cc b/aosp/dynamic_partition_control_android.cc
+index ec1ca32..a2daad8 100644
+--- a/aosp/dynamic_partition_control_android.cc
++++ b/aosp/dynamic_partition_control_android.cc
+@@ -67,7 +67,25 @@ using android::fs_mgr::Fstab;
+ using android::fs_mgr::MetadataBuilder;
+ using android::fs_mgr::Partition;
+ using android::fs_mgr::PartitionOpener;
++// Slot suffix helper. yogurt is a single-slot, non-A/B device: its super
++// metadata uses unsuffixed partition/group names, so the recovery flavour of
++// the engine (UE_NON_AB_RECOVERY) must address partitions without a suffix.
++// A/B-enabled builds keep the stock libfs_mgr behavior unchanged.
++#ifndef UE_NON_AB_RECOVERY
+ using android::fs_mgr::SlotSuffixForSlotNumber;
++namespace {
++std::string UeSlotSuffixForSlotNumber(uint32_t slot) {
++  return SlotSuffixForSlotNumber(slot);
++}
++}  // namespace
++#else
++namespace {
++std::string UeSlotSuffixForSlotNumber(uint32_t /*slot*/) {
++  // Single-slot device: partitions are unsuffixed.
++  return "";
++}
++}  // namespace
++#endif  // UE_NON_AB_RECOVERY
+ using android::snapshot::OptimizeSourceCopyOperation;
+ using android::snapshot::Return;
+ using android::snapshot::SnapshotManager;
+@@ -180,7 +198,7 @@ bool DynamicPartitionControlAndroid::OptimizeOperation(
+       return target_supports_snapshot_ &&
+              GetVirtualAbFeatureFlag().IsEnabled() &&
+              mapped_devices_.count(partition_name +
+-                                   SlotSuffixForSlotNumber(target_slot_)) > 0 &&
++                                   UeSlotSuffixForSlotNumber(target_slot_)) > 0 &&
+              OptimizeSourceCopyOperation(operation, optimized);
+       break;
+     default:
+@@ -521,10 +539,16 @@ bool DynamicPartitionControlAndroid::PreparePartitionsForUpdate(
+     return true;
+   }
+ 
++  // Route A (UE_NON_AB_RECOVERY): a single-slot recovery build has only one
++  // slot, so target == source == 0 is the required in-place prepare path (the
++  // payload metadata is resized directly on the current slot). The stock A/B
++  // refusal below is compiled out in that flavour only; stock builds keep it.
++#ifndef UE_NON_AB_RECOVERY
+   if (target_slot == source_slot) {
+     LOG(ERROR) << "Cannot call PreparePartitionsForUpdate on current slot.";
+     return false;
+   }
++#endif  // UE_NON_AB_RECOVERY
+ 
+   if (!SetTargetBuildVars(manifest)) {
+     return false;
+@@ -830,7 +854,7 @@ bool DynamicPartitionControlAndroid::EraseSystemOtherAvbFooter(
+     uint32_t source_slot, uint32_t target_slot) {
+   LOG(INFO) << "Erasing AVB footer of system_other partition before update.";
+ 
+-  const std::string target_suffix = SlotSuffixForSlotNumber(target_slot);
++  const std::string target_suffix = UeSlotSuffixForSlotNumber(target_slot);
+   const std::string partition_name_suffix = "system" + target_suffix;
+ 
+   std::string path;
+@@ -865,7 +889,7 @@ bool DynamicPartitionControlAndroid::PrepareDynamicPartitionsForUpdate(
+     uint32_t target_slot,
+     const DeltaArchiveManifest& manifest,
+     bool delete_source) {
+-  const std::string target_suffix = SlotSuffixForSlotNumber(target_slot);
++  const std::string target_suffix = UeSlotSuffixForSlotNumber(target_slot);
+ 
+   // Unmap all the target dynamic partitions because they would become
+   // inconsistent with the new metadata.
+@@ -1072,12 +1096,17 @@ bool DynamicPartitionControlAndroid::UpdatePartitionMetadata(
+   // target partitions.
+   builder->RemoveGroupAndPartitions(android::snapshot::kCowGroupName);
+ 
+-  const std::string target_suffix = SlotSuffixForSlotNumber(target_slot);
++  const std::string target_suffix = UeSlotSuffixForSlotNumber(target_slot);
+   DeleteGroupsWithSuffix(builder, target_suffix);
+ 
++  // Route A (UE_NON_AB_RECOVERY): the payload's declared group maxima may
++  // target a dual-slot super layout larger than this single-slot device's
++  // physical super. Real space is enforced by liblp at AddGroup /
++  // ResizePartition time against the actual AllocatableSpace below.
++#ifndef UE_NON_AB_RECOVERY
+   TEST_AND_RETURN_FALSE(
+       CheckSuperPartitionAllocatableSpace(builder, manifest, false));
+-
++#endif  // UE_NON_AB_RECOVERY
+   // name of partition(e.g. "system") -> size in bytes
+   std::map<std::string, uint64_t> partition_sizes;
+   for (const auto& partition : manifest.partitions()) {
+@@ -1199,7 +1228,7 @@ DynamicPartitionControlAndroid::GetPartitionDevice(
+   // When VABC is enabled, we can't get device path for dynamic partitions in
+   // target slot.
+   const auto& partition_name_suffix =
+-      partition_name + SlotSuffixForSlotNumber(slot);
++      partition_name + UeSlotSuffixForSlotNumber(slot);
+   if (UpdateUsesSnapshotCompression() && slot != current_slot &&
+       IsDynamicPartition(partition_name, slot)) {
+     return {
+@@ -1347,7 +1376,7 @@ bool DynamicPartitionControlAndroid::DeleteSourcePartitions(
+   LOG(INFO) << "Will overwrite existing partitions. Slot "
+             << BootControlInterface::SlotName(source_slot)
+             << " may be unbootable until update finishes!";
+-  const std::string source_suffix = SlotSuffixForSlotNumber(source_slot);
++  const std::string source_suffix = UeSlotSuffixForSlotNumber(source_slot);
+   DeleteGroupsWithSuffix(builder, source_suffix);
+ 
+   return true;
+@@ -1427,7 +1456,7 @@ bool DynamicPartitionControlAndroid::ListDynamicPartitionsForSlot(
+   TEST_AND_RETURN_FALSE(builder != nullptr);
+ 
+   std::vector<std::string> result;
+-  auto suffix = SlotSuffixForSlotNumber(slot);
++  auto suffix = UeSlotSuffixForSlotNumber(slot);
+   for (const auto& group : builder->ListGroups()) {
+     for (const auto& partition : builder->ListPartitionsInGroup(group)) {
+       std::string_view partition_name = partition->name();
+@@ -1495,7 +1524,7 @@ DynamicPartitionControlAndroid::OpenCowWriter(
+     const std::string& unsuffixed_partition_name,
+     const std::optional<std::string>& source_path,
+     std::optional<uint64_t> label) {
+-  auto suffix = SlotSuffixForSlotNumber(target_slot_);
++  auto suffix = UeSlotSuffixForSlotNumber(target_slot_);
+ 
+   auto super_device = GetSuperDevice();
+   if (!super_device.has_value()) {
+diff --git a/aosp/update_attempter_android.cc b/aosp/update_attempter_android.cc
+index 091d664..c7ed8bf 100644
+--- a/aosp/update_attempter_android.cc
++++ b/aosp/update_attempter_android.cc
+@@ -1257,6 +1257,13 @@ BootControlInterface::Slot UpdateAttempterAndroid::GetCurrentSlot() const {
+ }
+ 
+ BootControlInterface::Slot UpdateAttempterAndroid::GetTargetSlot() const {
++  // Single-slot (non-A/B) devices have no alternate slot to update into; a
++  // full OTA is applied in place (recovery deletes the source dynamic
++  // partitions from super first, then recreates them from the payload).
++  // Multi-slot devices keep the stock behavior.
++  if (boot_control_->GetNumSlots() <= 1) {
++    return GetCurrentSlot();
++  }
+   return GetCurrentSlot() == 0 ? 1 : 0;
+ }
+ 

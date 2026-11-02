@@ -1,0 +1,190 @@
+diff --git a/common/common-vendor.mk b/common/common-vendor.mk
+index b3ed25f..eed81ac 100644
+--- a/common/common-vendor.mk
++++ b/common/common-vendor.mk
+@@ -6,7 +6,6 @@ PRODUCT_SOONG_NAMESPACES += \
+     vendor/gms/common
+ 
+ PRODUCT_COPY_FILES += \
+-    vendor/gms/common/proprietary/product/app/Chrome/Chrome.apk.gz:$(TARGET_COPY_OUT_PRODUCT)/app/Chrome/Chrome.apk.gz \
+     vendor/gms/common/proprietary/product/app/TrichromeLibrary/TrichromeLibrary.apk.gz:$(TARGET_COPY_OUT_PRODUCT)/app/TrichromeLibrary/TrichromeLibrary.apk.gz \
+     vendor/gms/common/proprietary/product/app/WebViewGoogle/WebViewGoogle.apk.gz:$(TARGET_COPY_OUT_PRODUCT)/app/WebViewGoogle/WebViewGoogle.apk.gz \
+     vendor/gms/common/proprietary/product/etc/default-permissions/default-permissions-com.google.android.apps.pixel.agent.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/default-permissions/default-permissions-com.google.android.apps.pixel.agent.xml \
+@@ -127,79 +126,31 @@ PRODUCT_COPY_FILES += \
+     vendor/gms/common/proprietary/product/media/audio/ui/camera_focus.ogg:$(TARGET_COPY_OUT_PRODUCT)/media/audio/ui/camera_focus.ogg \
+     vendor/gms/common/proprietary/product/media/audio/ui/reverse_charging_end.ogg:$(TARGET_COPY_OUT_PRODUCT)/media/audio/ui/reverse_charging_end.ogg \
+     vendor/gms/common/proprietary/product/media/audio/ui/reverse_charging_start.ogg:$(TARGET_COPY_OUT_PRODUCT)/media/audio/ui/reverse_charging_start.ogg \
+-    vendor/gms/common/proprietary/product/usr/share/ime/google/d3_lms/ko_2018030706.zip:$(TARGET_COPY_OUT_PRODUCT)/usr/share/ime/google/d3_lms/ko_2018030706.zip \
+-    vendor/gms/common/proprietary/product/usr/share/ime/google/d3_lms/mozc.data:$(TARGET_COPY_OUT_PRODUCT)/usr/share/ime/google/d3_lms/mozc.data \
+-    vendor/gms/common/proprietary/product/usr/share/ime/google/d3_lms/zh_CN_2018030706.zip:$(TARGET_COPY_OUT_PRODUCT)/usr/share/ime/google/d3_lms/zh_CN_2018030706.zip \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/SODA_punctuation_config.pb:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/SODA_punctuation_config.pb \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/SODA_punctuation_model.tflite:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/SODA_punctuation_model.tflite \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/acousticmodel/LARGE_RNNT_VOICE_ACTIONS_EP_UNIFIED_FRONTEND.endpointer_portable_lstm_mean_stddev:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/acousticmodel/LARGE_RNNT_VOICE_ACTIONS_EP_UNIFIED_FRONTEND.endpointer_portable_lstm_mean_stddev \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/acousticmodel/LARGE_RNNT_VOICE_ACTIONS_EP_UNIFIED_FRONTEND.endpointer_portable_lstm_model:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/acousticmodel/LARGE_RNNT_VOICE_ACTIONS_EP_UNIFIED_FRONTEND.endpointer_portable_lstm_model \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/acousticmodel/MARBLE_VOICE_ACTIONS_EP_UNIFIED_FRONTEND.endpointer_portable_lstm_mean_stddev:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/acousticmodel/MARBLE_VOICE_ACTIONS_EP_UNIFIED_FRONTEND.endpointer_portable_lstm_mean_stddev \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/acousticmodel/MARBLE_VOICE_ACTIONS_EP_UNIFIED_FRONTEND.endpointer_portable_lstm_model:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/acousticmodel/MARBLE_VOICE_ACTIONS_EP_UNIFIED_FRONTEND.endpointer_portable_lstm_model \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/acousticmodel/SODA_DICTATION_EP_UNIFIED_FRONTEND.endpointer_portable_lstm_mean_stddev:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/acousticmodel/SODA_DICTATION_EP_UNIFIED_FRONTEND.endpointer_portable_lstm_mean_stddev \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/acousticmodel/SODA_DICTATION_EP_UNIFIED_FRONTEND.endpointer_portable_lstm_model:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/acousticmodel/SODA_DICTATION_EP_UNIFIED_FRONTEND.endpointer_portable_lstm_model \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/acousticmodel/SODA_DICTATION_EP_UNIFIED_FRONTEND_LANGID.endpointer_portable_lstm_mean_stddev:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/acousticmodel/SODA_DICTATION_EP_UNIFIED_FRONTEND_LANGID.endpointer_portable_lstm_mean_stddev \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/acousticmodel/SODA_DICTATION_EP_UNIFIED_FRONTEND_LANGID.endpointer_portable_lstm_model:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/acousticmodel/SODA_DICTATION_EP_UNIFIED_FRONTEND_LANGID.endpointer_portable_lstm_model \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/config.pumpkin:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/config.pumpkin \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/configs/LANGUAGE_IDENTIFICATION.config:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/configs/LANGUAGE_IDENTIFICATION.config \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/configs/ONDEVICE_MEDIUM_CONTINUOUS.config:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/configs/ONDEVICE_MEDIUM_CONTINUOUS.config \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/configs/ONDEVICE_MEDIUM_SHORT.config:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/configs/ONDEVICE_MEDIUM_SHORT.config \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/configs/ONDEVICE_MEDIUM_SHORT_compiler.config:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/configs/ONDEVICE_MEDIUM_SHORT_compiler.config \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/configs/ONDEVICE_MEDIUM_VOICE_MATCH.config:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/configs/ONDEVICE_MEDIUM_VOICE_MATCH.config \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/configs/ONDEVICE_SPEAKER_TURN_DETECTION.config:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/configs/ONDEVICE_SPEAKER_TURN_DETECTION.config \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/context_prebuilt/SODA.prebuilt_class_archive.mfar:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/context_prebuilt/SODA.prebuilt_class_archive.mfar \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/context_prebuilt/SODA.prebuilt_class_archive.syms:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/context_prebuilt/SODA.prebuilt_class_archive.syms \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/context_prebuilt/apps.txt:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/context_prebuilt/apps.txt \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/context_prebuilt/contacts.txt:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/context_prebuilt/contacts.txt \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/context_prebuilt/en-US_android-auto_car_automation.action.union_STD_FST.fst:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/context_prebuilt/en-US_android-auto_car_automation.action.union_STD_FST.fst \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/context_prebuilt/en-US_android-auto_manual_fixes_STD_FST.fst:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/context_prebuilt/en-US_android-auto_manual_fixes_STD_FST.fst \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/context_prebuilt/en-US_android-auto_top_radio_station_frequencies_STD_FST.fst:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/context_prebuilt/en-US_android-auto_top_radio_station_frequencies_STD_FST.fst \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/context_prebuilt/songs.txt:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/context_prebuilt/songs.txt \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/denorm/embedded_class_denorm.mfar:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/denorm/embedded_class_denorm.mfar \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/denorm/embedded_covid_19.mfar:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/denorm/embedded_covid_19.mfar \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/denorm/embedded_fix_ampm.mfar:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/denorm/embedded_fix_ampm.mfar \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/denorm/embedded_normalizer_no_emoticons_no_spoken_punc.mfar:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/denorm/embedded_normalizer_no_emoticons_no_spoken_punc.mfar \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/denorm/embedded_normalizer_only_emojis.mfar:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/denorm/embedded_normalizer_only_emojis.mfar \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/denorm/embedded_normalizer_only_spoken_punctuation.mfar:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/denorm/embedded_normalizer_only_spoken_punctuation.mfar \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/denorm/embedded_replace_annotated_emoticon_words_dash.mfar:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/denorm/embedded_replace_annotated_emoticon_words_dash.mfar \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/denorm/embedded_replace_annotated_punct_words_dash_no_emoticons.mfar:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/denorm/embedded_replace_annotated_punct_words_dash_no_emoticons.mfar \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/denorm/porn_normalizer_on_device.mfar:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/denorm/porn_normalizer_on_device.mfar \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/denorm/remove_spoken_punc_formatting.mfar:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/denorm/remove_spoken_punc_formatting.mfar \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/diarization/SODA_SPEAKER_TURN.scd.decoder:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/diarization/SODA_SPEAKER_TURN.scd.decoder \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/diarization/SODA_SPEAKER_TURN.scd.encoder:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/diarization/SODA_SPEAKER_TURN.scd.encoder \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/diarization/SODA_SPEAKER_TURN.scd.joint_model:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/diarization/SODA_SPEAKER_TURN.scd.joint_model \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/diarization/SODA_SPEAKER_TURN.scd.mean_stddev:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/diarization/SODA_SPEAKER_TURN.scd.mean_stddev \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/diarization/SODA_SPEAKER_TURN.scd.syms:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/diarization/SODA_SPEAKER_TURN.scd.syms \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/endtoendmodel/large_continuous_frontend_params.mean_stddev:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/endtoendmodel/large_continuous_frontend_params.mean_stddev \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/endtoendmodel/large_short_frontend_params.mean_stddev:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/endtoendmodel/large_short_frontend_params.mean_stddev \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/endtoendmodel/medium-decoder.tflite:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/endtoendmodel/medium-decoder.tflite \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/endtoendmodel/medium-encoder.tflite:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/endtoendmodel/medium-encoder.tflite \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/endtoendmodel/medium-joint_posterior.tflite:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/endtoendmodel/medium-joint_posterior.tflite \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/endtoendmodel/medium-joint_prior.tflite:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/endtoendmodel/medium-joint_prior.tflite \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/endtoendmodel/medium-rank_candidates_acoustic.tflite:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/endtoendmodel/medium-rank_candidates_acoustic.tflite \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/endtoendmodel/medium.syms.compact:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/endtoendmodel/medium.syms.compact \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/endtoendmodel/medium.wpm.portable:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/endtoendmodel/medium.wpm.portable \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/g2p:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/g2p \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/g2p.syms:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/g2p.syms \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/g2p_phonemes.syms:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/g2p_phonemes.syms \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/langid/ONDEVICE_langid.tflite:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/langid/ONDEVICE_langid.tflite \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/langid/application_params_langid_stream_multiclass_ONDEVICE:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/langid/application_params_langid_stream_multiclass_ONDEVICE \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/magic_mic/MARBLE_V2_acoustic_meanstddev_vector:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/magic_mic/MARBLE_V2_acoustic_meanstddev_vector \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/magic_mic/MARBLE_V2_acoustic_model.int8.tflite:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/magic_mic/MARBLE_V2_acoustic_model.int8.tflite \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/magic_mic/MARBLE_V2_model.int8.tflite:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/magic_mic/MARBLE_V2_model.int8.tflite \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/magic_mic/MARBLE_V2_vocabulary.syms:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/magic_mic/MARBLE_V2_vocabulary.syms \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/metadata:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/metadata \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/monastery_config.pumpkin:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/monastery_config.pumpkin \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/offline_action_data.pb:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/offline_action_data.pb \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/pumpkin.mmap:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/pumpkin.mmap \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/semantics.pumpkin:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/semantics.pumpkin \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/voice_match/MARBLE_speakerid.tflite:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/voice_match/MARBLE_speakerid.tflite \
+-    vendor/gms/common/proprietary/product/usr/srec/en-US/voice_match/MARBLE_voice_filter.tflite:$(TARGET_COPY_OUT_PRODUCT)/usr/srec/en-US/voice_match/MARBLE_voice_filter.tflite \
+     vendor/gms/common/proprietary/system/etc/permissions/privapp-permissions-google.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/permissions/privapp-permissions-google.xml \
+     vendor/gms/common/proprietary/system/etc/permissions/privapp_allowlist_com.google.android.ext.services.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/permissions/privapp_allowlist_com.google.android.ext.services.xml \
+     vendor/gms/common/proprietary/system_ext/etc/permissions/privapp-permissions-google-se.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/privapp-permissions-google-se.xml \
+     vendor/gms/common/proprietary/system_ext/etc/sysconfig/preinstalled-packages-com.android.google.avatarpicker.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/sysconfig/preinstalled-packages-com.android.google.avatarpicker.xml
+ 
++# [build-ledger wall 27, 2026-10-30] DF16-lite core-GMS trim. KEEP: Play Store
++# (Phonesky), GMS plumbing (PrebuiltGmsCoreVic + dynamites,
++# AndroidPlatformServices, GSF, ConfigUpdater, ModuleMetadata, Mlkit/Tflite/
++# VisionBarcode), provisioning (OneTimeInitializer, PartnerSetup, both setup
++# wizards, SearchSelector, PixelCoreServices), Chromium web stack
++# (WebViewGoogle + TrichromeLibrary stubs + .apk.gz), Essentials UNREPLACEABLE
++# in this tree (GoogleContacts + GoogleDialer/PrebuiltBugle [comms block
++# below — no Lineage dialer/SMS/contacts], GoogleTTS, DeskClock, Calculator,
++# SettingsIntelligence), tiny system bits (ExtServices/ext.shared/
++# DocumentsUIGoogle/TagGoogle), Flipendo/AccessibilityMenu/EmergencyInfo
++# (Settings API targets), TurboAdapter. DROP (~1.55 GB installed content):
++# Velvet, Photos, Gemini, AICore, DevicePersonalization/aiai, Chrome(-Stub +
++# .apk.gz above), Gboard [AOSP LatinIME ships: vendor/lineage/config/
++# common_mobile.mk:7], weather, scribe, wellbeing, files, talkback, arcore,
++# safetyhub, relationships, calendar, sound amplifier/switch access/markup/
++# soundpicker/NGA, auto stub, restore, DevicePolicy, storage manager,
++# location history, TurboPrebuilt (adapter kept), the 8 SystemUIClocks,
++# AvatarPickerGoogle, usr/srec + usr/share/ime data (dropped above).
++# Budget: product fs ~2.49 GB -> ~0.9 GB (BoardConfig wall-27; group slack
++# ~0.37 GB).
+ PRODUCT_PACKAGES += \
+     GoogleExtShared \
+     GooglePrintRecommendationService \
+@@ -207,33 +158,14 @@ PRODUCT_PACKAGES += \
+     GoogleExtServices \
+     TagGoogle \
+     CalculatorGooglePrebuilt_85006267 \
+-    CalendarGooglePrebuilt \
+-    Chrome-Stub \
+     CredentialManagerPrebuilt_credentialmanager.android_20250404.06_p0 \
+-    DevicePolicyPrebuilt-v10334460 \
+     GoogleContacts \
+     GoogleTTS \
+-    LatinIMEGooglePrebuilt \
+-    LocationHistoryPrebuilt \
+-    MarkupGoogle_v2 \
+     ModuleMetadataGoogle \
+-    NgaResources \
+-    Photos \
+-    SoundAmplifierPrebuilt_v4.8.758106410 \
+-    SoundPickerPrebuilt_33000242 \
+-    SwitchAccessPrebuilt_1.16.0.726766860 \
+     TrichromeLibrary-Stub \
+     WebViewGoogle-Stub \
+-    arcore-1.48 \
+-    talkback \
+-    AICorePrebuilt-aicore_20250130.00_RC01 \
+-    AndroidAutoStubPrebuilt \
+     ConfigUpdater \
+-    DevicePersonalizationPrebuiltPixel2025-playstore_aiai_20250306.00_RC10 \
+-    FilesPrebuilt \
+-    GeminiShell_227 \
+     GoogleOneTimeInitializer \
+-    GoogleRestorePrebuilt-v842048 \
+     PartnerSetupPrebuilt \
+     Phonesky \
+     PrebuiltDeskClockGoogle_76007351 \
+@@ -251,31 +183,14 @@ PRODUCT_PACKAGES += \
+     VisionBarcodePrebuilt \
+     PrebuiltGmsCoreVic \
+     PrebuiltPixelCoreServices \
+-    RelationshipsPrebuilt-301 \
+-    SafetyHubPrebuilt \
+-    ScribePrebuilt_v8.4.773573318 \
+     SearchSelectorPrebuilt \
+     SettingsIntelligenceGooglePrebuilt \
+     SetupWizardPrebuilt_v811313066 \
+-    TurboPrebuilt \
+-    Velvet \
+-    WeatherPixelPrebuilt_10006113 \
+-    WellbeingPrebuilt \
+     AccessibilityMenu \
+     EmergencyInfoGoogleNoUi \
+     Flipendo \
+-    AvatarPickerGoogle \
+     GoogleServicesFramework \
+     SetupWizardPixelPrebuilt_v802960446 \
+-    StorageManagerGoogle \
+-    SystemUIClocks-BigNum \
+-    SystemUIClocks-Calligraphy \
+-    SystemUIClocks-Flex \
+-    SystemUIClocks-Growth \
+-    SystemUIClocks-Inflate \
+-    SystemUIClocks-Metro \
+-    SystemUIClocks-NumOverlap \
+-    SystemUIClocks-Weather \
+     TurboAdapter
+ 
+ ifneq ($(WITH_GMS_COMMS_SUITE),false)
+diff --git a/common/overlays.mk b/common/overlays.mk
+index 122cff7..d68ec9f 100644
+--- a/common/overlays.mk
++++ b/common/overlays.mk
+@@ -20,7 +20,6 @@ PRODUCT_PACKAGES += \
+     PixelConfigOverlay2021 \
+     PixelConfigOverlayCommon \
+     PixelContactsProvider \
+-    PixelDeviceDiagnostics \
+     PixelDocumentsUIGoogleOverlay \
+     Pixelframework-res \
+     PixelSettingsGoogle \

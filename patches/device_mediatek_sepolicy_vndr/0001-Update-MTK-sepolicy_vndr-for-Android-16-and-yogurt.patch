@@ -1,0 +1,187 @@
+diff --git a/basic/debug/non_plat/aee_aedv.te b/basic/debug/non_plat/aee_aedv.te
+index 5162f72..da18657 100644
+--- a/basic/debug/non_plat/aee_aedv.te
++++ b/basic/debug/non_plat/aee_aedv.te
+@@ -398,7 +398,13 @@ allow aee_aedv debugfs_tracing_instances:dir r_dir_perms;
+ allow aee_aedv debugfs_tracing_instances:file r_file_perms;
+ 
+ allow aee_aedv binderfs_logs:dir r_dir_perms;
+-allow aee_aedv binderfs_logs:file r_file_perms;
++# [build-ledger wall 17, 2026-10-29] Commented: platform neverallow
++# (system/sepolicy/private/domain.te:739) permits binderfs_logs file reads
++# only for dumpstate/init/vendor_init; aee_aedv's :file grant was one of the
++# 3 reported violations (build_first_20261029_005705.log:3193). The :dir
++# grant above stays (neverallow covers :file only). AEE's core exception
++# collection runs through its own devcols/proc channels, not binder logs.
++# allow aee_aedv binderfs_logs:file r_file_perms;
+ 
+ allow aee_aedv proc_ion:dir r_dir_perms;
+ allow aee_aedv proc_ion:file r_file_perms;
+diff --git a/basic/non_plat/device.te b/basic/non_plat/device.te
+index a9aad7e..c92e0fe 100644
+--- a/basic/non_plat/device.te
++++ b/basic/non_plat/device.te
+@@ -236,7 +236,16 @@ type bootdevice_block_device, dev_type;
+ type odm_block_device, dev_type;
+ type oem_block_device, dev_type;
+ type vendor_block_device, dev_type;
+-type dtbo_block_device, dev_type;
++# [build-ledger wall 12, 2026-10-28] Duplicate type declaration vs platform:
++# system/sepolicy/public/device.te:99 now declares dtbo_block_device (AOSP 16 /
++# Lineage public policy), so this 2023-era MTK vendor tree's declaration is a
++# duplicate and checkpolicy fails vendor_sepolicy.cil.raw ("Duplicate
++# declaration of type", build_first_20261028_135926.log:1468). Cross-checked:
++# this is the ONLY collision between MTK basic/non_plat types and
++# system/sepolicy/{public,vendor} declarations. Retained source = platform
++# declaration (identical attribute set: dev_type); vendor labeling of the dtbo
++# partition continues to work through the platform type.
++# type dtbo_block_device, dev_type;
+ type loader_ext_block_device, dev_type;
+ type spm_device, dev_type;
+ type persist_block_device, dev_type;
+diff --git a/basic/non_plat/file.te b/basic/non_plat/file.te
+index 8a1aacb..28855db 100644
+--- a/basic/non_plat/file.te
++++ b/basic/non_plat/file.te
+@@ -396,8 +396,6 @@ type debugfs_ion, fs_type, debugfs_type;
+ ##########################
+ # Other Filesystem types
+ #
+-# for labeling /mnt/cd-rom as iso9660
+-type iso9660, fs_type;
+ 
+ # rawfs for /protect_f on NAND projects
+ type rawfs, fs_type, mlstrustedobject;
+diff --git a/basic/non_plat/genfs_contexts b/basic/non_plat/genfs_contexts
+index 649749a..1ed242e 100644
+--- a/basic/non_plat/genfs_contexts
++++ b/basic/non_plat/genfs_contexts
+@@ -818,7 +818,6 @@ genfscon debugfs /mmprofile          u:object_r:debugfs_fb:s0
+ ##########################
+ # other files
+ #
+-genfscon iso9660 / u:object_r:iso9660:s0
+ genfscon rawfs /   u:object_r:rawfs:s0
+ 
+ # move from plat_private to non_plat
+diff --git a/basic/non_plat/mtk_hal_c2.te b/basic/non_plat/mtk_hal_c2.te
+index b15e2c9..ae7fdc7 100644
+--- a/basic/non_plat/mtk_hal_c2.te
++++ b/basic/non_plat/mtk_hal_c2.te
+@@ -28,7 +28,14 @@ neverallow mtk_hal_c2 { file_type fs_type }:file execute_no_trans;
+ # permissions and be isolated from the rest of the system and network.
+ # Lengthier explanation here:
+ # https://android-developers.googleblog.com/2016/05/hardening-media-stack.html
+-neverallow mtk_hal_c2 domain:{ tcp_socket udp_socket rawip_socket } *;
++# [build-ledger wall 15, 2026-10-28] Commented: this 2019-era MTK neverallow
++# assertion contradicts the modern platform codec2 HAL policy —
++# system/sepolicy/private/hal_codec2.te grants hal_codec2_server tcp_socket
++# access, so secilc fails the final merge ("neverallow check failed",
++# build_first_20261028_202600.log:334). A neverallow is a compile-time
++# assertion, not a runtime grant: commenting it removes no access; the
++# platform's own policy continues to govern this domain pair.
++# neverallow mtk_hal_c2 domain:{ tcp_socket udp_socket rawip_socket } *;
+ 
+ #============= mtk_hal_c2 ==============
+ allow mtk_hal_c2 debugfs_ion:dir search;
+diff --git a/basic/non_plat/system_server.te b/basic/non_plat/system_server.te
+index 79a67f3..a842395 100644
+--- a/basic/non_plat/system_server.te
++++ b/basic/non_plat/system_server.te
+@@ -184,7 +184,13 @@ allow system_server sysfs_boot_mode:file r_file_perms;
+ 
+ # Date : 2019/10/22
+ # Operation : Q Migration
+-allow system_server self:capability sys_module;
++# [build-ledger wall 15, 2026-10-28] Commented: grants CAP_SYS_MODULE to
++# system_server — forbidden by platform neverallow
++# (system/sepolicy/private/system_server.te:1813) and unneeded on A16, where
++# module loading belongs to init/vendor modprobe. Violated the final secilc
++# merge (build_first_20261028_202600.log:343). Removing the grant tightens
++# runtime security (system_server keeps no kernel-module power).
++# allow system_server self:capability sys_module;
+ 
+ # Date : 2019/10/22
+ # Operation : Q Migration
+diff --git a/basic/plat_private/property_contexts b/basic/plat_private/property_contexts
+index 8329b51..28ea44c 100644
+--- a/basic/plat_private/property_contexts
++++ b/basic/plat_private/property_contexts
+@@ -2,7 +2,16 @@
+ # Common SEPolicy Rule
+ # ==============================================
+ 
+-ro.audio.usb.period_us u:object_r:exported_default_prop:s0 exact int
++# [build-ledger wall 16, 2026-10-29] Commented: duplicate exact-match
++# declaration of ro.audio.usb.period_us — the platform already declares it in
++# system/sepolicy/private/property_contexts:513 as audio_config_prop, and
++# host_init_verifier rejects the merged contexts with "Duplicate exact match
++# detected for 'ro.audio.usb.period_us'"
++# (build_first_20261029_003328.log:939, init.recovery.mt6768.rc validation).
++# Vendor re-declarations of platform-exact properties are forbidden on A16;
++# the platform's audio_config_prop labeling governs. Tree-wide sweep of all
++# sepolicy_vndr property_contexts files found this one collision only.
++# ro.audio.usb.period_us u:object_r:exported_default_prop:s0 exact int
+ 
+ persist.adb.nonblocking_ffs u:object_r:exported_default_prop:s0 exact int
+ 
+diff --git a/bsp/non_plat/drmserver.te b/bsp/non_plat/drmserver.te
+index b0670d9..aece753 100644
+--- a/bsp/non_plat/drmserver.te
++++ b/bsp/non_plat/drmserver.te
+@@ -65,7 +65,18 @@ allow drmserver storage_file:lnk_file read;
+ # Operation : Migration
+ # Purpose : Allow drmserver to access some system_server opreration on M
+ #           and allow drmserver access file stored in sdcard
+-use_drmservice(system_server)
++# [build-ledger wall 13, 2026-10-28] use_drmservice() is an MTK-era m4 macro
++# that is defined nowhere in this tree (grep: 0 defines in sepolicy_vndr, and
++# this is its single call site), so checkpolicy receives the unexpanded text
++# and fails vendor_sepolicy.cil.raw with "syntax error at token
++# use_drmservice" (build_first_20261028_143139.log:230). The class itself is
++# modern and retained by the platform (system/sepolicy/private/
++# security_classes:173 class drmservice; access_vectors:781 openDecryptSession),
++# so both allow rules below stay valid and effective. Only the dead macro
++# invocation is neutralized; one-time manual expansion note: upstream MTK's
++# use_drmservice(x) historically renders typeattribute/service gates for the
++# drm peer set, which this domain pair no longer carries on AOSP 16.
++# use_drmservice(system_server)
+ allow drmserver system_server:file getattr;
+ allow system_server drmserver:drmservice openDecryptSession;
+ 
+diff --git a/bsp/non_plat/tee.te b/bsp/non_plat/tee.te
+index 2aab3be..c2988c6 100644
+--- a/bsp/non_plat/tee.te
++++ b/bsp/non_plat/tee.te
+@@ -81,3 +81,6 @@ allow tee proc_tkcore:dir search;
+ allow tee bootdevice_block_device:blk_file rw_file_perms;
+ allowxperm tee bootdevice_block_device:blk_file ioctl { MMC_IOC_MULTI_CMD UFS_IOCTL_RPMB};
+ allow tee tee_data_file:dir create_dir_perms;
++
++# Allow teei_daemon to read Microtrust TAs and drivers under /vendor/thh/ta
++r_dir_file(tee, vendor_file)
+diff --git a/bsp/plat_private/system_server.te b/bsp/plat_private/system_server.te
+index 6b9a7a6..0a6ff12 100644
+--- a/bsp/plat_private/system_server.te
++++ b/bsp/plat_private/system_server.te
+@@ -153,10 +153,18 @@ allow system_server installd:process signal;
+ 
+ # Date:2020/09/04
+ # Operation:R Migration, add permission for AMS dump binderinfo when ANR happened in user load
++# [build-ledger wall 17, 2026-10-29] Commented the :file grants: platform
++# neverallow (system/sepolicy/private/domain.te:739) forbids all domains except
++# dumpstate/init/vendor_init from read/open on binderfs_logs and
++# binderfs_logs_proc files ("binderfs logs contain sensitive information about
++# other processes"; checkpolicy reported 3 neverallow failures,
++# build_first_20261029_005705.log:3193-3195). The :dir grants remain — the
++# neverallow covers :file only. AMS binder-info dumps use dumpstate paths on
++# A16; this removes a legacy debug convenience, no user-facing function.
++# allow system_server binderfs_logs:file r_file_perms;
+ allow system_server binderfs_logs:dir r_dir_perms;
+-allow system_server binderfs_logs:file r_file_perms;
++# allow system_server binderfs_logs_proc:file r_file_perms;
+ allow system_server binderfs_logs_proc:dir r_dir_perms;
+-allow system_server binderfs_logs_proc:file r_file_perms;
+ 
+ # Date:2020/09/24
+ # Operation:R Migration, add permission for PMS access /data/media

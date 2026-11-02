@@ -10,3 +10,13 @@ allow hal_fingerprint_default input_device:dir r_dir_perms;
 allow hal_fingerprint_default input_device:chr_file rw_file_perms;
 allow hal_fingerprint_default uhid_device:chr_file rw_file_perms;
 
+# 2026-10-25 live-device audit fix (recon/live_audit/tombstones, FINDINGS 10a):
+# the HAL must read/write FocalTech calibration + statistics files under
+# /data/vendor/focaltech — labelled vendor_data_file in our file_contexts.
+# Audited denials: open ff_config.dat / ff_statistics.dat. Without these the
+# vendor HAL cannot complete init (config read) — same crash-loop family seen
+# on DF13 (vndbinder mmap abort was its tree's gap; ours has vndbinder_use).
+allow hal_fingerprint_default vendor_data_file:dir { search getattr read write create add_name };
+allow hal_fingerprint_default vendor_data_file:file { open read write getattr create };
+get_prop(hal_fingerprint_default, vendor_mtk_soter_teei_prop)
+

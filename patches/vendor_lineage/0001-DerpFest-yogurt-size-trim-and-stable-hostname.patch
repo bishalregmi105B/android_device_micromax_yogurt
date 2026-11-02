@@ -1,0 +1,67 @@
+diff --git a/build/envsetup.sh b/build/envsetup.sh
+index e339a91..50d80dc 100644
+--- a/build/envsetup.sh
++++ b/build/envsetup.sh
+@@ -12,8 +12,8 @@ function check_product()
+         echo "Couldn't locate the top of the tree. Try setting TOP." >&2
+         return
+     fi
+-    if (echo -n $1 | grep -q -e "^lineage_") ; then
+-        LINEAGE_BUILD=$(echo -n $1 | sed -e 's/^lineage_//g')
++    if (echo -n $1 | grep -q -E "^(lineage|derp)_") ; then
++        LINEAGE_BUILD=$(echo -n $1 | sed -E 's/^(lineage|derp)_//g')
+     else
+         LINEAGE_BUILD=
+     fi
+@@ -768,9 +768,7 @@ function build_kernel() {
+ 
+ function generate_host_overrides() {
+     export BUILD_USERNAME=android-build
+-    HEX=$(openssl rand -hex 8)
+-    ALPHA=$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 4 | head -n 1)
+-    export BUILD_HOSTNAME="r-${HEX}-${ALPHA}"
++    export BUILD_HOSTNAME="r-derpfest-yogurt"
+     echo "BUILD_USERNAME=$BUILD_USERNAME"
+     echo "BUILD_HOSTNAME=$BUILD_HOSTNAME"
+ }
+diff --git a/config/common.mk b/config/common.mk
+index 1b2bc2c..3f17137 100644
+--- a/config/common.mk
++++ b/config/common.mk
+@@ -10,6 +10,7 @@ PRODUCT_SOURCE_ROOT_DIRS += -prebuilts/misc/protobuf_vendorcompat
+ -include $(sort $(wildcard vendor/*/*/exclude-bp.mk))
+ 
+ PRODUCT_BRAND ?= DerpFest
++LINEAGE_BUILD ?= $(PRODUCT_DEVICE)
+ 
+ ifeq ($(PRODUCT_GMS_CLIENTID_BASE),)
+ PRODUCT_PRODUCT_PROPERTIES += \
+diff --git a/config/derpfest.mk b/config/derpfest.mk
+index a3c4a21..1466b1b 100644
+--- a/config/derpfest.mk
++++ b/config/derpfest.mk
+@@ -64,10 +64,8 @@ PRODUCT_PACKAGES += \
+     GameSpace \
+     LMOFreeform \
+     LMOFreeformSidebar \
+-    LMOSystemUIClock \
+     Miniature \
+     Panic \
+-    OmniStyle \
+     Prospect \
+     Ripple
+ 
+diff --git a/tools/generate_json_build_info.sh b/tools/generate_json_build_info.sh
+index 49cfd87..d752fd7 100755
+--- a/tools/generate_json_build_info.sh
++++ b/tools/generate_json_build_info.sh
+@@ -19,6 +19,9 @@ if [[ -f "$file_path" ]]; then
+     echo "Generating .json"
+     file_name=$(basename "$file_path")
+     device_name=$(echo "$file_name" | cut -d'-' -f4)
++    if [[ -z "$device_name" || "$device_name" == *"zip"* || "$device_name" == "$file_name" ]]; then
++        device_name="${TARGET_DEVICE:-yogurt}"
++    fi
+     
+     # Set output directory with fallback
+     out_dir="${OUT_DIR:-out}"

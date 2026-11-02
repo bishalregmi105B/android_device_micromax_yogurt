@@ -37,13 +37,17 @@ TARGET_NO_BOOTLOADER := true
 TARGET_SCREEN_DENSITY := 480
 
 # Init
-TARGET_INIT_VENDOR_LIB := //$(DEVICE_PATH):libinit_mt6768
+# 2026-10-25 migrated per DerpFest/Soong config semantics
+# (was: TARGET_INIT_VENDOR_LIB := //$(DEVICE_PATH):libinit_mt6768 — legacy
+# make var, now triggers $(error) in vendor/lineage/config/BoardConfigSoong.mk.
+# The soong libinit extension lives at system/core/init/Android.bp:241.)
+$(call soong_config_set,libinit,vendor_init_lib,//$(DEVICE_PATH):libinit_mt6768)
 TARGET_RECOVERY_DEVICE_MODULES := libinit_mt6768
 
 # Kernel
 BOARD_BOOTIMG_HEADER_VERSION := 2
 BOARD_KERNEL_BASE := 0x40078000
-BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2 androidboot.selinux=permissive
+BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2 androidboot.selinux=enforcing
 BOARD_KERNEL_PAGESIZE := 2048
 BOARD_RAMDISK_OFFSET := 0x07c08000
 BOARD_KERNEL_TAGS_OFFSET := 0x0bc08000
@@ -61,8 +65,14 @@ TARGET_KERNEL_CLANG_COMPILE := true
 TARGET_KERNEL_CLANG_VERSION := r353983c1
 TARGET_KERNEL_LLVM_BINUTILS := false
 
-# Kernel - prebuilt
-# TARGET_FORCE_PREBUILT_KERNEL := true
+# Kernel - prebuilt (activated 2026-10-26): ship the proven Phase-1 kernel
+# blob (vendor/lineage/build/tasks/kernel.mk:230ff honors TARGET_FORCE_PREBUILT
+# even when source is present). Source build pinned clang-r353983c1 (A10-era),
+# absent from A16 prebuilts clang set (r547379/r563880/r574158) - kick 09 wall:
+# ccache "Could not find compiler clang". Phase-2 source rebuild is deferred
+# post-validation by spec. Buildtype unofficial-class, so the kernel.mk
+# official-buildtype guard does not fire.
+TARGET_FORCE_PREBUILT_KERNEL := true
 ifeq ($(TARGET_FORCE_PREBUILT_KERNEL),true)
 TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilts/kernel
 BOARD_INCLUDE_DTB_IN_BOOTIMG := 
@@ -76,16 +86,30 @@ BOARD_DTBOIMG_PARTITION_SIZE := 8388608
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 33554432
 BOARD_CACHEIMAGE_PARTITION_SIZE := 452984832
 BOARD_USERDATAIMAGE_PARTITION_SIZE := 25384959488
-BOARD_SUPER_PARTITION_SIZE := 9126805504
+# [build-ledger wall 27, 2026-10-30] DF16-lite super geometry: scoped to the
+# E7746's REAL physical super (mmcblk0p36 = 4,294,967,296 B exactly). The old
+# 9,126,805,504 B values copied the official DF16.2 image budget, which does
+# not exist on this hardware (wall-26 side-load verdict: liblp aborts with
+# "Not enough free space to expand partition: system" once content-derived
+# fs sizes -- product 2,756,288,512 + system 2,661,220,352 + vendor
+# 589,488,128 ~= 6.0 GB -- are allocated into 4.0 GB of physical space).
+# New budget (measured DF16.2 content sizes minus core-GMS trim, vendor/gms
+# product fs ~2.49 GB -> ~0.9 GB; see vendor/gms/common/common-vendor.mk):
+#   super            = 4,294,967,296  (real partition)
+#   group max        = 4,290,772,992  (super - 4 MiB liblp metadata headroom)
+#   per-partition reserve: 256 MiB -> 64 MiB (content-derived fs sizes must
+#   all fit the group together; system 2.48 GB + product ~0.96 GB + vendor
+#   0.59 GB ~= 4.05 GB <= 4.29 GB, ~0.37 GB slack).
+BOARD_SUPER_PARTITION_SIZE := 4294967296
 BOARD_SUPER_PARTITION_GROUPS := micromax_dynamic_partitions
 BOARD_MICROMAX_DYNAMIC_PARTITIONS_PARTITION_LIST := \
     product \
     system \
     vendor
 
-BOARD_MICROMAX_DYNAMIC_PARTITIONS_SIZE := 9122611200
-BOARD_SYSTEMIMAGE_PARTITION_RESERVED_SIZE := 268435456
-BOARD_PRODUCTIMAGE_PARTITION_RESERVED_SIZE := 268435456
+BOARD_MICROMAX_DYNAMIC_PARTITIONS_SIZE := 4290772992
+BOARD_SYSTEMIMAGE_PARTITION_RESERVED_SIZE := 0
+BOARD_PRODUCTIMAGE_PARTITION_RESERVED_SIZE := 0
 BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_SYSTEMIMAGE_FILE_SYSTEM_TYPE := ext4
@@ -136,6 +160,16 @@ BOARD_AVB_RECOVERY_ROLLBACK_INDEX_LOCATION := 3
 
 # Sepolicy
 include device/mediatek/sepolicy_vndr/SEPolicy.mk
+
+# 2026-10-25 Lineage/DerpFest config chain (BootConfigSoong/Kernel) — required
+# so the soong lineageVarsPlugin registers KERNEL_*, TARGET_KERNEL_* vars used
+# by vendor/lineage/build/soong generated_kernel_includes. Pinned ***
+BOARD_USES_FULL_RECOVERY_IMAGE := false  # stock E7746: separate recovery.img (DF13 OTA proof)
+TARGET_KERNEL_NO_GCC := true             # A16 prebuilts have no gcc-4.9; headers_install = host tools
+ifeq ($(LINEAGE_BUILD),)
+include vendor/lineage/config/BoardConfigLineage.mk
+include device/lineage/sepolicy/common/sepolicy.mk
+endif
 BOARD_VENDOR_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/vendor
 SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/private
 TARGET_USING_LEGACY_SELINUX := true

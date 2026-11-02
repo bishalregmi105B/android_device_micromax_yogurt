@@ -87,6 +87,8 @@ Only the three quirks included above are recognized at this point:
         </MediaCodec>
         <MediaCodec name="OMX.MTK.VIDEO.DECODER.HEVC" type="video/hevc" >
             <Limit name="size" min="16x16" max="2560x1440" />
+            <Limit name="alignment" value="16x16" />
+            <Limit name="block-size" value="16x16" />
             <Quirk name="requires-allocate-on-input-ports" />
             <Quirk name="requires-allocate-on-output-ports" />
             <Feature name="adaptive-playback"/>
@@ -111,6 +113,8 @@ Only the three quirks included above are recognized at this point:
         </MediaCodec>
         <MediaCodec name="OMX.MTK.VIDEO.DECODER.AVC" type="video/avc" >
             <Limit name="size" min="64x64" max="2560x1440" />
+            <Limit name="alignment" value="16x16" />
+            <Limit name="block-size" value="16x16" />
             <Quirk name="wants-NAL-fragments" />
             <Quirk name="requires-allocate-on-input-ports" />
             <Quirk name="requires-allocate-on-output-ports" />
@@ -121,6 +125,8 @@ Only the three quirks included above are recognized at this point:
         </MediaCodec>
         <MediaCodec name="OMX.MTK.VIDEO.DECODER.AVC.l3" type="video/avc" >
             <Limit name="size" min="64x64" max="2560x1440" />
+            <Limit name="alignment" value="16x16" />
+            <Limit name="block-size" value="16x16" />
             <Quirk name="wants-NAL-fragments" />
             <Quirk name="requires-allocate-on-input-ports" />
             <Quirk name="requires-allocate-on-output-ports" />

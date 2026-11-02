@@ -30,16 +30,18 @@ using android::hardware::joinRpcThreadpool;
 using android::sp;
 
 int main() {
-    android::sp<IBiometricsFingerprint> bio = BiometricsFingerprint::getInstance();
+    BiometricsFingerprint* impl = static_cast<BiometricsFingerprint*>(BiometricsFingerprint::getInstance());
+    android::sp<IBiometricsFingerprint> bio = impl;
 
     configureRpcThreadpool(1, true /*callerWillJoin*/);
 
-    if (bio != nullptr) {
+    if (bio != nullptr && impl != nullptr && impl->isDeviceValid()) {
         if (::android::OK != bio->registerAsService()) {
             return 1;
         }
     } else {
-        ALOGE("Can't create instance of BiometricsFingerprint, nullptr");
+        ALOGE("Can't create valid instance of BiometricsFingerprint, device not ready");
+        return 1;
     }
 
     joinRpcThreadpool();

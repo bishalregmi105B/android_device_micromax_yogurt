@@ -155,33 +155,61 @@ Return<uint64_t> BiometricsFingerprint::setNotify(
 }
 
 Return<uint64_t> BiometricsFingerprint::preEnroll()  {
+    if (!mDevice) {
+        ALOGE("mDevice is null");
+        return 0;
+    }
     return mDevice->pre_enroll(mDevice);
 }
 
 Return<RequestStatus> BiometricsFingerprint::enroll(const hidl_array<uint8_t, 69>& hat,
         uint32_t gid, uint32_t timeoutSec) {
+    if (!mDevice) {
+        ALOGE("mDevice is null");
+        return RequestStatus::SYS_EINVAL;
+    }
     const hw_auth_token_t* authToken =
         reinterpret_cast<const hw_auth_token_t*>(hat.data());
     return ErrorFilter(mDevice->enroll(mDevice, authToken, gid, timeoutSec));
 }
 
 Return<RequestStatus> BiometricsFingerprint::postEnroll() {
+    if (!mDevice) {
+        ALOGE("mDevice is null");
+        return RequestStatus::SYS_EINVAL;
+    }
     return ErrorFilter(mDevice->post_enroll(mDevice));
 }
 
 Return<uint64_t> BiometricsFingerprint::getAuthenticatorId() {
+    if (!mDevice) {
+        ALOGE("mDevice is null");
+        return 0;
+    }
     return mDevice->get_authenticator_id(mDevice);
 }
 
 Return<RequestStatus> BiometricsFingerprint::cancel() {
+    if (!mDevice) {
+        ALOGE("mDevice is null");
+        return RequestStatus::SYS_EINVAL;
+    }
     return ErrorFilter(mDevice->cancel(mDevice));
 }
 
 Return<RequestStatus> BiometricsFingerprint::enumerate()  {
+    if (!mDevice) {
+        ALOGE("mDevice is null");
+        return RequestStatus::SYS_EINVAL;
+    }
     return ErrorFilter(mDevice->enumerate(mDevice));
 }
 
 Return<RequestStatus> BiometricsFingerprint::remove(uint32_t gid, uint32_t fid) {
+    if (!mDevice) {
+        ALOGE("mDevice is null");
+        return RequestStatus::SYS_EINVAL;
+    }
     return ErrorFilter(mDevice->remove(mDevice, gid, fid));
 }
 
@@ -194,6 +222,10 @@ Return<RequestStatus> BiometricsFingerprint::setActiveGroup(uint32_t gid,
     if (access(storePath.c_str(), W_OK)) {
         return RequestStatus::SYS_EINVAL;
     }
+    if (!mDevice) {
+        ALOGE("mDevice is null");
+        return RequestStatus::SYS_EINVAL;
+    }
 
     return ErrorFilter(mDevice->set_active_group(mDevice, gid,
                                                     storePath.c_str()));
@@ -201,6 +233,10 @@ Return<RequestStatus> BiometricsFingerprint::setActiveGroup(uint32_t gid,
 
 Return<RequestStatus> BiometricsFingerprint::authenticate(uint64_t operationId,
         uint32_t gid) {
+    if (!mDevice) {
+        ALOGE("mDevice is null");
+        return RequestStatus::SYS_EINVAL;
+    }
     return ErrorFilter(mDevice->authenticate(mDevice, operationId, gid));
 }
 

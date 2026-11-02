@@ -1,0 +1,26 @@
+diff --git a/packages/SystemUI/src/com/android/systemui/screenrecord/RecordingService.java b/packages/SystemUI/src/com/android/systemui/screenrecord/RecordingService.java
+index 94f0e7b15..02c8b75b4 100644
+--- a/packages/SystemUI/src/com/android/systemui/screenrecord/RecordingService.java
++++ b/packages/SystemUI/src/com/android/systemui/screenrecord/RecordingService.java
+@@ -237,7 +237,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
+                 mShowTaps = intent.getBooleanExtra(EXTRA_SHOW_TAPS, false);
+                 mLowQuality = intent.getBooleanExtra(EXTRA_LOW_QUALITY, false);
+                 mLongerDuration = intent.getBooleanExtra(EXTRA_LONGER_DURATION, false);
+-                mHEVC = intent.getBooleanExtra(EXTRA_HEVC, true);
++                mHEVC = intent.getBooleanExtra(EXTRA_HEVC, false);
+                 mKeepScreenAwake = intent.getBooleanExtra(EXTRA_KEEP_SCREEN_AWAKE, false);
+ 
+                 MediaProjectionCaptureTarget captureTarget =
+diff --git a/packages/SystemUI/src/com/android/systemui/screenrecord/ScreenRecordPermissionContentManager.kt b/packages/SystemUI/src/com/android/systemui/screenrecord/ScreenRecordPermissionContentManager.kt
+index 62df1a816..7116f48e5 100644
+--- a/packages/SystemUI/src/com/android/systemui/screenrecord/ScreenRecordPermissionContentManager.kt
++++ b/packages/SystemUI/src/com/android/systemui/screenrecord/ScreenRecordPermissionContentManager.kt
+@@ -308,7 +308,7 @@ class ScreenRecordPermissionContentManager(
+         audioSwitch.isChecked = Prefs.getInt(userContext, PREF_AUDIO, 0) == 1
+         options.setSelection(Prefs.getInt(userContext, PREF_AUDIO_SOURCE, 0))
+         skipTimeSwitch.isChecked = Prefs.getInt(userContext, PREF_SKIP, 0) == 1
+-        hevcSwitch.isChecked = Prefs.getInt(userContext, PREF_HEVC, 1) == 1
++        hevcSwitch.isChecked = Prefs.getInt(userContext, PREF_HEVC, 0) == 1
+         keepAwakeSwitch.isChecked = Prefs.getInt(userContext, PREF_KEEP_AWAKE, 0) == 1
+     }
+ 
