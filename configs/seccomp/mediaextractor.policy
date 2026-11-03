@@ -6,3 +6,6 @@ unlinkat: 1
 setsockopt: 1
 clock_gettime: 1
 setrlimit: 1
+close_range: 1
+faccessat2: 1
+epoll_pwait2: 1

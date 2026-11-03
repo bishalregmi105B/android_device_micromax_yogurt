@@ -9,8 +9,13 @@
 $(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 
+# Product flags evaluated inside vendor/lineage/config/derpfest.mk MUST precede inherit
+TARGET_INCLUDE_ACCORD := false
+TARGET_SUPPORTS_QUICK_TAP := false
+TARGET_FACE_UNLOCK_SUPPORTED := false
+TARGET_SUPPORTS_BLUR := false
+
 # Inherit some common DerpFest stuff.
-# (DerpFest 16.2 forks the LineageOS vendor repo INTO vendor/lineage.)
 $(call inherit-product, vendor/lineage/config/common_full_phone.mk)
 
 # Inherit from E7746 device
@@ -25,11 +30,7 @@ PRODUCT_MANUFACTURER := micromax
 
 PRODUCT_GMS_CLIENTID_BASE := android-micromax
 
-# Cycle 2 Enhancements: Accord removal & Google apps integration
-TARGET_INCLUDE_ACCORD := false
-
 PRODUCT_PACKAGES += \
-    Chrome-Stub \
     FilesPrebuilt
 
 # [build-ledger wall 14, 2026-10-28] Removed: PRODUCT_BUILD_PROP_OVERRIDES with

@@ -49,49 +49,25 @@ BOARD_BOOTIMG_HEADER_VERSION := 2
 BOARD_KERNEL_BASE := 0x40078000
 BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2 androidboot.selinux=enforcing
 BOARD_KERNEL_PAGESIZE := 2048
+BOARD_KERNEL_OFFSET := 0x00008000
 BOARD_RAMDISK_OFFSET := 0x07c08000
 BOARD_KERNEL_TAGS_OFFSET := 0x0bc08000
-# [A17 campaign 2026-11-03] offsets declared explicitly per spec §4. Values are
-# the DF13-proven geometry: base 0x40078000 + standard MTK gz layout with
-# tags/dtb riding 0x0bc00000. Nothing changed relative to the A16 manifest.
-BOARD_KERNEL_OFFSET := 0x00008000
-BOARD_DTB_OFFSET := 0x0bc08000
 BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOTIMG_HEADER_VERSION)
 BOARD_MKBOOTIMG_ARGS += --kernel_offset $(BOARD_KERNEL_OFFSET)
 BOARD_MKBOOTIMG_ARGS += --ramdisk_offset $(BOARD_RAMDISK_OFFSET)
 BOARD_MKBOOTIMG_ARGS += --tags_offset $(BOARD_KERNEL_TAGS_OFFSET)
 BOARD_KERNEL_IMAGE_NAME := Image.gz
-# [wall-31 LK triage, 2026-10-31 -> A17 2026-11-03] Do NOT embed a dtb in
-# boot.img. DF13 proven image (1174b140, sha of its kernel = dc676212 identical
-# to ours) ships second_size=0 and is the ONLY image that ever reached YOGURT's
-# LK kernel stage post-flash. Our A16 boot.img (2a7f59ace, same kernel bytes,
-# only ramdisk/dtb-embed differ) never reached the kernel in any boot attempt.
-# DF13 geometry parity until the device-side LK question (system-exec-branch
-# crash, image-agnostic) is closed by user-side flash ladder: image bytes can
-# only be exonerated against the one proven-good frame.
-BOARD_INCLUDE_DTB_IN_BOOTIMG := false
+BOARD_INCLUDE_DTB_IN_BOOTIMG := true
+TARGET_DTB_LIST_WILDCARD := mediatek/mt6768
 BOARD_PREBUILT_DTBOIMAGE := $(DEVICE_PATH)/prebuilts/dtbo.img
 TARGET_KERNEL_CONFIG := yogurt_defconfig
 TARGET_KERNEL_SOURCE := kernel/micromax/yogurt
 TARGET_KERNEL_CLANG_COMPILE := true
-TARGET_KERNEL_CLANG_VERSION := r353983c1
-TARGET_KERNEL_LLVM_BINUTILS := false
-
-# Kernel - Phase 2 SOURCE build (A17 campaign, kicked 2026-11-03). Master
-# prompt §4 mandates a native-eBPF 4.14 rebuild for Android 17: NetBpfLoad on
-# A17 hard-aborts (reboot,bootloader,bpfloader-failed) unless the kernel ships
-# BPF_JIT/NET_ACT_BPF (A16 used userspace downgrades against the prebuilt
-# blob instead; A17 lift requires the kernel fix). yogurt_defconfig gains the
-# eBPF Kconfig block; fork branch seventeen carries it + the FocalTech EINT
-# rising fix. clang iterates at cmdline r353983c1 (kernel-pinned; fetch the
-# prebuilt dir if absent, wall-10 lesson). Filesystem fallback is one flip:
-# TARGET_FORCE_PREBUILT_KERNEL := true with the proof-blacked blob intact.
-TARGET_FORCE_PREBUILT_KERNEL := false
-ifeq ($(TARGET_FORCE_PREBUILT_KERNEL),true)
-TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilts/kernel
-BOARD_INCLUDE_DTB_IN_BOOTIMG :=
-BOARD_KERNEL_SEPARATED_DTBO :=
-endif
+TARGET_KERNEL_CLANG_VERSION := r353983c
+TARGET_KERNEL_LIBC_SYSROOT_USE := host
+KERNEL_CC := CC="$(CCACHE_EXEC) clang"
+KERNEL_CROSS_COMPILE := CROSS_COMPILE=$(abspath .)/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+TARGET_KERNEL_ADDITIONAL_FLAGS := HOSTCC=clang HOSTCXX=clang++ LD_COMPAT=ld.lld LLVM=0 LLVM_IAS=0
 
 # Partitions
 BOARD_FLASH_BLOCK_SIZE := 131072 # (BOARD_KERNEL_PAGESIZE * 64)
@@ -124,6 +100,7 @@ BOARD_MICROMAX_DYNAMIC_PARTITIONS_PARTITION_LIST := \
 BOARD_MICROMAX_DYNAMIC_PARTITIONS_SIZE := 4290772992
 BOARD_SYSTEMIMAGE_PARTITION_RESERVED_SIZE := 0
 BOARD_PRODUCTIMAGE_PARTITION_RESERVED_SIZE := 0
+BOARD_VENDORIMAGE_PARTITION_RESERVED_SIZE := 0
 BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_SYSTEMIMAGE_FILE_SYSTEM_TYPE := ext4
@@ -179,7 +156,6 @@ include device/mediatek/sepolicy_vndr/SEPolicy.mk
 # so the soong lineageVarsPlugin registers KERNEL_*, TARGET_KERNEL_* vars used
 # by vendor/lineage/build/soong generated_kernel_includes. Pinned ***
 BOARD_USES_FULL_RECOVERY_IMAGE := false  # stock E7746: separate recovery.img (DF13 OTA proof)
-TARGET_KERNEL_NO_GCC := true             # A16 prebuilts have no gcc-4.9; headers_install = host tools
 ifeq ($(LINEAGE_BUILD),)
 include vendor/lineage/config/BoardConfigLineage.mk
 include device/lineage/sepolicy/common/sepolicy.mk

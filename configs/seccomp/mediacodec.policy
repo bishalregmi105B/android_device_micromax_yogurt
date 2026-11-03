@@ -19,3 +19,6 @@ sysinfo: 1
 setsockopt: 1
 setrlimit: 1
 eventfd2: 1
+close_range: 1
+faccessat2: 1
+epoll_pwait2: 1

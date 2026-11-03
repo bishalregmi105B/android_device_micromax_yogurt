@@ -1,2 +1,5 @@
 #Mediatek used system call
 clock_nanosleep: 1
+close_range: 1
+faccessat2: 1
+epoll_pwait2: 1

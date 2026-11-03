@@ -35,7 +35,7 @@
 <!ATTLIST Audio sampleRate CDATA #REQUIRED>
 <!ATTLIST Audio channels (1|2) #REQUIRED>
 <!ELEMENT ImageEncoding EMPTY>
-<!ATTLIST ImageEncoding quality (90|80|70|60|50|40) #REQUIRED>
+<!ATTLIST ImageEncoding quality (100|95|90|80|70|60|50|40) #REQUIRED>
 <!ELEMENT ImageDecoding EMPTY>
 <!ATTLIST ImageDecoding memCap CDATA #REQUIRED>
 <!ELEMENT Camera EMPTY>
@@ -93,9 +93,9 @@
                    height="1080"
                    frameRate="30" />
             <Audio codec="aac"
-                   bitRate="128000"
+                   bitRate="256000"
                    sampleRate="48000"
-                   channels="1" />
+                   channels="2" />
         </EncoderProfile>
         <EncoderProfile quality="qcif" fileFormat="mp4" duration="30">
             <Video codec="h263"
@@ -159,9 +159,9 @@
                    height="1080"
                    frameRate="30" />
             <Audio codec="aac"
-                   bitRate="128000"
+                   bitRate="256000"
                    sampleRate="48000"
-                   channels="1" />
+                   channels="2" />
         </EncoderProfile>
         <EncoderProfile quality="timelapselow" fileFormat="mp4" duration="30">
             <Video codec="h263"
@@ -281,14 +281,14 @@
              mode — a fake 60fps entry would desync legacy apps. -->
         <EncoderProfile quality="2160p" fileFormat="mp4" duration="30">
             <Video codec="h264"
-                   bitRate="40000000"
+                   bitRate="42000000"
                    width="3840"
                    height="2160"
                    frameRate="30" />
             <Audio codec="aac"
-                   bitRate="128000"
+                   bitRate="256000"
                    sampleRate="48000"
-                   channels="1" />
+                   channels="2" />
         </EncoderProfile>
         <EncoderProfile quality="highspeed1080p" fileFormat="mp4" duration="30">
             <Video codec="h264"
@@ -297,11 +297,11 @@
                    height="1080"
                    frameRate="120" />
             <Audio codec="aac"
-                   bitRate="128000"
+                   bitRate="256000"
                    sampleRate="48000"
-                   channels="1" />
+                   channels="2" />
         </EncoderProfile>
-        <ImageEncoding quality="95" />
+        <ImageEncoding quality="100" />
         <ImageEncoding quality="80" />
         <ImageEncoding quality="70" />
         <ImageDecoding memCap="20000000" />
@@ -326,9 +326,9 @@
                    height="1080"
                    frameRate="30" />
             <Audio codec="aac"
-                   bitRate="128000"
+                   bitRate="256000"
                    sampleRate="48000"
-                   channels="1" />
+                   channels="2" />
         </EncoderProfile>
         <!-- prize  add  for sub camera 1080p  by zhuzhengjiang    20201123-end -->		
         <EncoderProfile quality="qcif" fileFormat="mp4" duration="30">
@@ -394,9 +394,9 @@
                    height="1080"
                    frameRate="30" />
             <Audio codec="aac"
-                   bitRate="128000"
+                   bitRate="256000"
                    sampleRate="48000"
-                   channels="1" />
+                   channels="2" />
         </EncoderProfile>
         <!-- prize  add  for sub camera 1080p  by zhuzhengjiang    20201123-end -->
         <EncoderProfile quality="timelapselow" fileFormat="mp4" duration="30">
@@ -529,9 +529,9 @@
                    height="1080"
                    frameRate="30" />
             <Audio codec="aac"
-                   bitRate="128000"
+                   bitRate="256000"
                    sampleRate="48000"
-                   channels="1" />
+                   channels="2" />
         </EncoderProfile>
         <EncoderProfile quality="qcif" fileFormat="mp4" duration="30">
             <Video codec="h263"
@@ -595,9 +595,9 @@
                    height="1080"
                    frameRate="30" />
             <Audio codec="aac"
-                   bitRate="128000"
+                   bitRate="256000"
                    sampleRate="48000"
-                   channels="1" />
+                   channels="2" />
         </EncoderProfile>
         <EncoderProfile quality="timelapselow" fileFormat="mp4" duration="30">
             <Video codec="h263"
@@ -904,9 +904,9 @@
                    height="1080"
                    frameRate="30" />
             <Audio codec="aac"
-                   bitRate="128000"
+                   bitRate="256000"
                    sampleRate="48000"
-                   channels="1" />
+                   channels="2" />
         </EncoderProfile>
         <EncoderProfile quality="qcif" fileFormat="mp4" duration="30">
             <Video codec="h263"
@@ -970,9 +970,9 @@
                    height="1080"
                    frameRate="30" />
             <Audio codec="aac"
-                   bitRate="128000"
+                   bitRate="256000"
                    sampleRate="48000"
-                   channels="1" />
+                   channels="2" />
         </EncoderProfile>
         <EncoderProfile quality="timelapselow" fileFormat="mp4" duration="30">
             <Video codec="h263"
@@ -1107,11 +1107,16 @@
          In other words, the applications won't be able to use the codec
          or query the capabilities of the codec at all if it is disabled
     -->
-    <VideoEncoderCap name="h264" enabled="true"
+    <VideoEncoderCap name="hevc" enabled="true"
         minBitRate="64000" maxBitRate="40000000"
-        minFrameWidth="176" maxFrameWidth="1920"
-        minFrameHeight="144" maxFrameHeight="1080"
+        minFrameWidth="176" maxFrameWidth="3840"
+        minFrameHeight="144" maxFrameHeight="2160"
         minFrameRate="15" maxFrameRate="30" />
+    <VideoEncoderCap name="h264" enabled="true"
+        minBitRate="64000" maxBitRate="50000000"
+        minFrameWidth="176" maxFrameWidth="3840"
+        minFrameHeight="144" maxFrameHeight="2160"
+        minFrameRate="15" maxFrameRate="120" />
     <VideoEncoderCap name="h263" enabled="true"
         minBitRate="64000" maxBitRate="2000000"
         minFrameWidth="176" maxFrameWidth="640"

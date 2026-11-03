@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Enable auxiliary cameras selector. -->
+    <!-- Enable auxiliary cameras selector (0=48MP main, 1=16MP front, 3=5MP ultrawide, 4=2MP macro). -->
     <bool name="config_enableAuxCameras">true</bool>
 
-    <!-- List of ID of auxiliary cameras that must be ignored by the app. -->
-    <string-array name="config_ignoredAuxCameraIds">
-        <item>23</item>
+    <!-- Ignore non-imaging 2MP bokeh depth sensor (2) and duplicate logical wrapper (5). -->
+    <string-array name="config_ignoredAuxCameraIds" translatable="false">
+        <item>2</item>
+        <item>5</item>
     </string-array>
 
-    <!-- Enable 60 FPS video recording on FHD (1080p) -->
-    <string-array name="config_additionalVideoConfigurations" translatable="false">
-        <item>0</item>
-        <item>fhd</item>
-        <item>60</item>
-    </string-array>
+    <!-- Keep high-resolution output enabled. -->
+    <bool name="config_enableHighResolution">true</bool>
 </resources>

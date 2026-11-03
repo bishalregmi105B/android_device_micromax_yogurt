@@ -21,7 +21,7 @@ ro.sys.usb.mtp.whql.enable=0
 ro.sys.usb.storage.type=mtp
 
 # Kernel
-ro.zygote.preload.enable=0
+ro.zygote.preload.enable=1
 sys.ipo.disable=1
 sys.ipo.pwrdncap=2
 ro.kernel.zio=38,108,105,16
@@ -38,7 +38,10 @@ ro.mediatek.wlan.wsc=1
 # Camera
 ro.odm.camera=1
 ro.camera.sound.forced=0
+ro.media.enc.jpeg.quality=100
 persist.sys.front_camera_sound_type=1
+persist.vendor.camera.HAL3.enabled=1
+persist.vendor.camera.eis.enable=1
 persist.vendor.camera.privapp.list=com.android.camera,com.google.camera,org.lineageos.aperture
 vendor.camera.aux.packagelist=com.android.camera,com.google.camera,net.sourceforge.opencamera,org.lineageos.aperture
 
