@@ -1,13 +1,14 @@
 # Audio
 ro.audio.silent=0
 ro.audio.usb.period_us=16000
-ro.lmk.kill_heaviest_task=true
-ro.lmk.psi_partial_stall_ms=100
+# Android 17 LMKD PSI Tuning (4GB LPDDR4X + 60% ZSTD zRAM)
+ro.lmk.psi_partial_stall_ms=70
 ro.lmk.psi_complete_stall_ms=700
-ro.lmk.thrashing_limit=40
+ro.lmk.thrashing_limit=35
 ro.lmk.thrashing_limit_decay=10
-ro.lmk.swap_util_max=90
-ro.lmk.swap_free_low_percentage=15
+ro.lmk.swap_free_low_percentage=10
+ro.lmk.swap_compression_ratio=3
+ro.lmk.direct_reclaim_threshold_ms=100
 ro.vendor.have_aee_feature=1
 ro.vendor.have_aeev_feature=1
 ro.vendor.mtk_audio_alac_support=1
@@ -159,9 +160,6 @@ ro.com.android.mobiledata=true
 ro.control_privapp_permissions=enforce
 ro.hardware.egl=mali
 ro.kernel.zio=38,108,105,16
-ro.lmk.downgrade_pressure=60
-ro.lmk.kill_timeout_ms=100
-ro.lmk.use_new_strategy=true
 ro.logd.size=1048576
 ro.opa.eligible_device=true
 ro.postinstall.fstab.prefix=/system
@@ -296,6 +294,7 @@ debug.sf.enable_transaction_tracing=false
 debug.hwui.skia_atrace_enabled=false
 debug.sf.enable_egl_image_tracker=0
 debug.renderengine.backend=skiaglthreaded
+debug.hwui.renderer=skiagl
 debug.sf.treat_170m_as_sRGB=1
 
 # Zygote

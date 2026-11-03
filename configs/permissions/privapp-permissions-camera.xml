@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Privileged app permissions for Camera packages (Aperture, Google Camera)
+-->
+<permissions>
+    <privapp-permissions package="org.lineageos.aperture">
+        <permission name="android.permission.CAMERA" />
+        <permission name="android.permission.RECORD_AUDIO" />
+        <permission name="android.permission.ACCESS_FINE_LOCATION" />
+        <permission name="android.permission.WRITE_SECURE_SETTINGS" />
+        <permission name="android.permission.SYSTEM_CAMERA" />
+    </privapp-permissions>
+    <privapp-permissions package="com.android.camera">
+        <permission name="android.permission.CAMERA" />
+        <permission name="android.permission.RECORD_AUDIO" />
+        <permission name="android.permission.SYSTEM_CAMERA" />
+    </privapp-permissions>
+    <privapp-permissions package="com.google.android.GoogleCamera">
+        <permission name="android.permission.CAMERA" />
+        <permission name="android.permission.RECORD_AUDIO" />
+        <permission name="android.permission.SYSTEM_CAMERA" />
+    </privapp-permissions>
+</permissions>

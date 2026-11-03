@@ -42,8 +42,8 @@ ro.media.enc.jpeg.quality=100
 persist.sys.front_camera_sound_type=1
 persist.vendor.camera.HAL3.enabled=1
 persist.vendor.camera.eis.enable=1
-persist.vendor.camera.privapp.list=com.android.camera,com.google.camera,org.lineageos.aperture
-vendor.camera.aux.packagelist=com.android.camera,com.google.camera,net.sourceforge.opencamera,org.lineageos.aperture
+persist.vendor.camera.privapp.list=com.android.camera,com.google.camera,org.lineageos.aperture,com.google.android.GoogleCamera,com.google.android.GoogleCameraEng,com.google.android.GoogleCameraGood,com.google.android.GoogleCamera.Urnyx,com.google.android.apps.cameralite
+vendor.camera.aux.packagelist=com.android.camera,com.google.camera,net.sourceforge.opencamera,org.lineageos.aperture,com.google.android.GoogleCamera,com.google.android.GoogleCameraEng,com.google.android.GoogleCameraGood,com.google.android.GoogleCamera.Urnyx,com.google.android.apps.cameralite
 
 # IMS
 persist.dbg.volte_avail_ovr=1

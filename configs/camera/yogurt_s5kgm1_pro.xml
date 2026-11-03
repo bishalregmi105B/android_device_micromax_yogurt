@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--
+    Google Camera (BSG / LMC / Shamim) XML Configuration for Micromax IN Note 1 (yogurt)
+    SoC: MediaTek Helio G85 (MT6768)
+    Primary Sensor: 48 MP Samsung ISOCELL GM1 (S5KGM1ST / Tetracell) -> 12 MP default / 48 MP remosaic
+    Front Sensor: 16 MP Samsung S5K3P9SP
+    Ultrawide Sensor: 5 MP GalaxyCore GC5035
+    Macro Sensor: 2 MP GalaxyCore GC02M1
+-->
+<gcam_config>
+    <!-- Hardware Stream & Color Correction -->
+    <setting key="pref_c2api_stream_key" value="RAW10" />
+    <setting key="pref_black_level_key" value="64.0" />
+    <setting key="pref_black_level_front_key" value="64.0" />
+    <setting key="pref_color_model_key" value="s5kgm1" />
+    <setting key="pref_awb_model_key" value="pixel_3" />
+
+    <!-- HDR+ Frame Counts (Tuned for Helio G85 8-core CPU without capture lag) -->
+    <setting key="pref_hdr_frames_key" value="9" />
+    <setting key="pref_hdr_plus_enhanced_key" value="1" />
+    <setting key="pref_sabre_key" value="1" />
+    <setting key="pref_noise_reduction_key" value="2" />
+    <setting key="pref_sharpness_key" value="1.25" />
+    <setting key="pref_saturation_key" value="1.1" />
+
+    <!-- Aux Lens Mapping for Micromax IN Note 1 -->
+    <setting key="pref_aux_main_id" value="0" />
+    <setting key="pref_aux_front_id" value="1" />
+    <setting key="pref_aux_wide_id" value="3" />
+    <setting key="pref_aux_macro_id" value="4" />
+    <setting key="pref_aux_enable_key" value="1" />
+
+    <!-- Stabilization & Focus -->
+    <setting key="pref_optical_stabilization_key" value="0" />
+    <setting key="pref_electronic_stabilization_key" value="1" />
+    <setting key="pref_focus_tracking_key" value="1" />
+    <setting key="pref_motion_photo_key" value="0" />
+</gcam_config>

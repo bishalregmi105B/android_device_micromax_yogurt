@@ -12,7 +12,7 @@ on post-fs-data && property:ro.crypto.state=unencrypted
 
 on post-fs-data
     write /proc/sys/vm/page-cluster 0
-    swapon_all /vendor/etc/fstab.enableswap
+    swapon_all /vendor/etc/fstab.mt6768
     write /dev/memcg/memory.swappiness 100
     write /dev/memcg/apps/memory.swappiness 100
     write /dev/memcg/system/memory.swappiness 100

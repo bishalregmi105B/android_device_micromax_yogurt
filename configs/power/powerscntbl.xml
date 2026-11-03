@@ -18,4 +18,23 @@
         <data cmd="PERF_RES_SCHED_UCLAMP_MIN_TA" param1="100"></data>
         <data cmd="PERF_RES_SCHED_CACHE_AUDIT" param1="1"></data>
     </scenario>
+    <!-- DerpFest GameSpace & Android Game Mode Performance -->
+    <scenario powerhint="FIXED_PERFORMANCE">
+        <data cmd="PERF_RES_CPUFREQ_MIN_CLUSTER_0" param1="1500000"></data>
+        <data cmd="PERF_RES_CPUFREQ_MIN_CLUSTER_1" param1="1800000"></data>
+        <data cmd="PERF_RES_CPUFREQ_MAX_CLUSTER_0" param1="3000000"></data>
+        <data cmd="PERF_RES_CPUFREQ_MAX_CLUSTER_1" param1="3000000"></data>
+        <data cmd="PERF_RES_SCHED_UCLAMP_MIN_TA" param1="80"></data>
+        <data cmd="PERF_RES_SCHED_BOOST_VALUE_ROOT" param1="30"></data>
+        <data cmd="PERF_RES_DRAM_OPP_MIN" param1="0"></data>
+        <data cmd="PERF_RES_GPU_GED_BENCHMARK_ON" param1="1"></data>
+        <data cmd="PERF_RES_GPU_GED_GX_BOOST" param1="1"></data>
+        <data cmd="PERF_RES_FPS_FBT_KMIN" param1="10"></data>
+    </scenario>
+    <!-- SurfaceFlinger Heavy Frame Render Boost -->
+    <scenario powerhint="EXPENSIVE_RENDERING">
+        <data cmd="PERF_RES_CPUFREQ_MIN_CLUSTER_1" param1="1400000"></data>
+        <data cmd="PERF_RES_SCHED_UCLAMP_MIN_TA" param1="60"></data>
+        <data cmd="PERF_RES_GPU_GED_GX_BOOST" param1="1"></data>
+    </scenario>
 </SCNTABLE>
