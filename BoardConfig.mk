@@ -51,13 +51,25 @@ BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2 androidboot.selinux=enforcing
 BOARD_KERNEL_PAGESIZE := 2048
 BOARD_RAMDISK_OFFSET := 0x07c08000
 BOARD_KERNEL_TAGS_OFFSET := 0x0bc08000
+# [A17 campaign 2026-11-03] offsets declared explicitly per spec §4. Values are
+# the DF13-proven geometry: base 0x40078000 + standard MTK gz layout with
+# tags/dtb riding 0x0bc00000. Nothing changed relative to the A16 manifest.
+BOARD_KERNEL_OFFSET := 0x00008000
+BOARD_DTB_OFFSET := 0x0bc08000
 BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOTIMG_HEADER_VERSION)
+BOARD_MKBOOTIMG_ARGS += --kernel_offset $(BOARD_KERNEL_OFFSET)
 BOARD_MKBOOTIMG_ARGS += --ramdisk_offset $(BOARD_RAMDISK_OFFSET)
 BOARD_MKBOOTIMG_ARGS += --tags_offset $(BOARD_KERNEL_TAGS_OFFSET)
 BOARD_KERNEL_IMAGE_NAME := Image.gz
-BOARD_INCLUDE_DTB_IN_BOOTIMG := true
-TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilts/dtb.img
-BOARD_MKBOOTIMG_ARGS += --dtb $(TARGET_PREBUILT_DTB)
+# [wall-31 LK triage, 2026-10-31 -> A17 2026-11-03] Do NOT embed a dtb in
+# boot.img. DF13 proven image (1174b140, sha of its kernel = dc676212 identical
+# to ours) ships second_size=0 and is the ONLY image that ever reached YOGURT's
+# LK kernel stage post-flash. Our A16 boot.img (2a7f59ace, same kernel bytes,
+# only ramdisk/dtb-embed differ) never reached the kernel in any boot attempt.
+# DF13 geometry parity until the device-side LK question (system-exec-branch
+# crash, image-agnostic) is closed by user-side flash ladder: image bytes can
+# only be exonerated against the one proven-good frame.
+BOARD_INCLUDE_DTB_IN_BOOTIMG := false
 BOARD_PREBUILT_DTBOIMAGE := $(DEVICE_PATH)/prebuilts/dtbo.img
 TARGET_KERNEL_CONFIG := yogurt_defconfig
 TARGET_KERNEL_SOURCE := kernel/micromax/yogurt
@@ -65,18 +77,20 @@ TARGET_KERNEL_CLANG_COMPILE := true
 TARGET_KERNEL_CLANG_VERSION := r353983c1
 TARGET_KERNEL_LLVM_BINUTILS := false
 
-# Kernel - prebuilt (activated 2026-10-26): ship the proven Phase-1 kernel
-# blob (vendor/lineage/build/tasks/kernel.mk:230ff honors TARGET_FORCE_PREBUILT
-# even when source is present). Source build pinned clang-r353983c1 (A10-era),
-# absent from A16 prebuilts clang set (r547379/r563880/r574158) - kick 09 wall:
-# ccache "Could not find compiler clang". Phase-2 source rebuild is deferred
-# post-validation by spec. Buildtype unofficial-class, so the kernel.mk
-# official-buildtype guard does not fire.
-TARGET_FORCE_PREBUILT_KERNEL := true
+# Kernel - Phase 2 SOURCE build (A17 campaign, kicked 2026-11-03). Master
+# prompt §4 mandates a native-eBPF 4.14 rebuild for Android 17: NetBpfLoad on
+# A17 hard-aborts (reboot,bootloader,bpfloader-failed) unless the kernel ships
+# BPF_JIT/NET_ACT_BPF (A16 used userspace downgrades against the prebuilt
+# blob instead; A17 lift requires the kernel fix). yogurt_defconfig gains the
+# eBPF Kconfig block; fork branch seventeen carries it + the FocalTech EINT
+# rising fix. clang iterates at cmdline r353983c1 (kernel-pinned; fetch the
+# prebuilt dir if absent, wall-10 lesson). Filesystem fallback is one flip:
+# TARGET_FORCE_PREBUILT_KERNEL := true with the proof-blacked blob intact.
+TARGET_FORCE_PREBUILT_KERNEL := false
 ifeq ($(TARGET_FORCE_PREBUILT_KERNEL),true)
 TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilts/kernel
-BOARD_INCLUDE_DTB_IN_BOOTIMG := 
-BOARD_KERNEL_SEPARATED_DTBO := 
+BOARD_INCLUDE_DTB_IN_BOOTIMG :=
+BOARD_KERNEL_SEPARATED_DTBO :=
 endif
 
 # Partitions
