@@ -8,7 +8,7 @@
 # Core Partitions
 system /system ext4 ro wait,avb=vbmeta_system,logical,first_stage_mount,avb_keys=/avb/q-developer-gsi.avbpubkey:/avb/r-developer-gsi.avbpubkey:/avb/s-developer-gsi.avbpubkey,readahead_size_kb=128
 vendor /vendor ext4 ro wait,avb,logical,first_stage_mount,readahead_size_kb=128
-product /product ext4 ro wait,avb,logical,first_stage_mount
+product /product ext4 ro wait,avb,logical,first_stage_mount,readahead_size_kb=128
 /dev/block/platform/bootdevice/by-name/userdata /data f2fs noatime,nosuid,nodev,discard,noflush_merge,fsync_mode=nobarrier,reserve_root=134217,resgid=1065 wait,check,formattable,reservedsize=128m,latemount,checkpoint=fs,fileencryption=aes-256-xts,readahead_size_kb=128
 /dev/block/platform/bootdevice/by-name/cache /cache ext4 noatime,nosuid,nodev,noauto_da_alloc,discard wait,check,formattable
 /dev/block/platform/bootdevice/by-name/dtbo /dtbo emmc defaults defaults
@@ -51,5 +51,5 @@ product /product ext4 ro wait,avb,logical,first_stage_mount
 /dev/block/platform/bootdevice/by-name/boot_para /boot_para emmc defaults defaults
 /dev/block/platform/bootdevice/by-name/otp /otp emmc defaults defaults
 
-# zRAM
-/dev/block/zram0 none swap defaults zramsize=60%,max_comp_streams=8
+# zRAM managed by mmd (zram + backing_dev writeback)
+# /dev/block/zram0 none swap defaults zramsize=60%,max_comp_streams=8

@@ -1,0 +1,5 @@
+# Legacy Mali/MediaTek graphics allocator HAL needs ION and GPU device access
+# (removed from AOSP system/sepolicy/private/hal_graphics_allocator.te in 16/17).
+allow hal_graphics_allocator_default ion_device:chr_file r_file_perms;
+allow hal_graphics_allocator_default gpu_device:chr_file rw_file_perms;
+allow hal_graphics_allocator_default gpu_device:dir r_dir_perms;

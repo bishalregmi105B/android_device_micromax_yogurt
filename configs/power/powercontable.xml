@@ -214,7 +214,7 @@
         <Prefix>low_latency_mode^</Prefix>
     </CMD>
     <CMD name="PERF_RES_IO_F2FS_UFS_BOOST" id="0x02c04000">
-        <Entry path="/sys/fs/f2fs/sdc42/current_flush_merge"></Entry>
+        <Entry path="/sys/fs/f2fs/mmcblk0p38/current_flush_merge"></Entry>
         <LegacyCmdID>142</LegacyCmdID>
         <Compare>more</Compare>
         <MaxValue>100</MaxValue>
@@ -222,7 +222,7 @@
         <DefaultValue>0</DefaultValue>
     </CMD>
     <CMD name="PERF_RES_IO_F2FS_EMMC_BOOST" id="0x02c08000">
-        <Entry path="/sys/fs/f2fs/mmcblk0p42/current_flush_merge"></Entry>
+        <Entry path="/sys/fs/f2fs/mmcblk0p38/current_flush_merge"></Entry>
         <LegacyCmdID>143</LegacyCmdID>
         <Compare>more</Compare>
         <MaxValue>100</MaxValue>

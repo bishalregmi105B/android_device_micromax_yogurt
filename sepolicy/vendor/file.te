@@ -1,3 +1,4 @@
 type sysfs_light, fs_type, sysfs_type, mlstrustedobject;
 type sysfs_graphics, sysfs_type, fs_type, mlstrustedobject;
+type sysfs_tp_gesture, fs_type, sysfs_type, mlstrustedobject;
 type proc_vm, fs_type, proc_type;

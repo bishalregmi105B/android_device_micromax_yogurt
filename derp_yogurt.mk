@@ -13,7 +13,7 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 TARGET_INCLUDE_ACCORD := false
 TARGET_SUPPORTS_QUICK_TAP := false
 TARGET_FACE_UNLOCK_SUPPORTED := false
-TARGET_SUPPORTS_BLUR := false
+TARGET_SUPPORTS_BLUR := true
 
 # Inherit some common DerpFest stuff.
 $(call inherit-product, vendor/lineage/config/common_full_phone.mk)

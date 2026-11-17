@@ -168,5 +168,10 @@ TARGET_USING_LEGACY_SELINUX := true
 DEVICE_MATRIX_FILE := $(DEVICE_PATH)/configs/vintf/compatibility_matrix.xml
 DEVICE_MANIFEST_FILE := $(DEVICE_PATH)/configs/vintf/manifest.xml
 
+# Graphics / Gralloc 2.0/2.1 support on Android 17 (API 37)
+SOONG_CONFIG_NAMESPACES += libui
+SOONG_CONFIG_libui += legacy_gralloc
+SOONG_CONFIG_libui_legacy_gralloc := true
+
 # Releasetools
 TARGET_RELEASETOOLS_EXTENSIONS := $(DEVICE_PATH)

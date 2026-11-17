@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <SCNTABLE>
     <scenario powerhint="INTERACTION">
-        <data cmd="PERF_RES_CPUFREQ_MIN_CLUSTER_0" param1="1075000"></data>
-        <data cmd="PERF_RES_CPUFREQ_MIN_CLUSTER_1" param1="1162000"></data>
+        <data cmd="PERF_RES_CPUFREQ_MIN_CLUSTER_0" param1="1350000"></data>
+        <data cmd="PERF_RES_CPUFREQ_MIN_CLUSTER_1" param1="1500000"></data>
         <data cmd="PERF_RES_CPUFREQ_MAX_CLUSTER_0" param1="3000000"></data>
         <data cmd="PERF_RES_CPUFREQ_MAX_CLUSTER_1" param1="3000000"></data>
-        <data cmd="PERF_RES_SCHED_UCLAMP_MIN_TA" param1="50"></data>
-        <data cmd="PERF_RES_POWERHAL_TOUCH_BOOST_DURATION" param1="1000000000"></data>
-        <data cmd="PERF_RES_POWERHAL_TOUCH_BOOST_EAS_BOOST" param1="50"></data>
+        <data cmd="PERF_RES_SCHED_UCLAMP_MIN_TA" param1="65"></data>
+        <data cmd="PERF_RES_POWERHAL_TOUCH_BOOST_DURATION" param1="250000000"></data>
+        <data cmd="PERF_RES_POWERHAL_TOUCH_BOOST_EAS_BOOST" param1="60"></data>
         <data cmd="PERF_RES_POWERHAL_TOUCH_BOOST_NOTIFY_FBC" param1="1"></data>
+        <data cmd="PERF_RES_GPU_GED_GX_BOOST" param1="1"></data>
+        <data cmd="PERF_RES_DRAM_OPP_MIN" param1="0"></data>
     </scenario>
     <scenario powerhint="LAUNCH">
         <data cmd="PERF_RES_CPUFREQ_MIN_CLUSTER_0" param1="3000000"></data>
@@ -33,8 +35,10 @@
     </scenario>
     <!-- SurfaceFlinger Heavy Frame Render Boost -->
     <scenario powerhint="EXPENSIVE_RENDERING">
-        <data cmd="PERF_RES_CPUFREQ_MIN_CLUSTER_1" param1="1400000"></data>
-        <data cmd="PERF_RES_SCHED_UCLAMP_MIN_TA" param1="60"></data>
+        <data cmd="PERF_RES_CPUFREQ_MIN_CLUSTER_0" param1="1500000"></data>
+        <data cmd="PERF_RES_CPUFREQ_MIN_CLUSTER_1" param1="1800000"></data>
+        <data cmd="PERF_RES_SCHED_UCLAMP_MIN_TA" param1="80"></data>
+        <data cmd="PERF_RES_DRAM_OPP_MIN" param1="0"></data>
         <data cmd="PERF_RES_GPU_GED_GX_BOOST" param1="1"></data>
     </scenario>
 </SCNTABLE>

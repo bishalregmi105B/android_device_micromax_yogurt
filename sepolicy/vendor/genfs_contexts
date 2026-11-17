@@ -1,3 +1,8 @@
 # VM
 genfscon proc /sys/vm/direct_swappiness                               u:object_r:proc_vm:s0
 genfscon proc /sys/vm/dirty_background_bytes                          u:object_r:proc_vm:s0
+genfscon proc /sys/vm/vfs_cache_pressure                              u:object_r:proc_vm:s0
+genfscon proc /sys/vm/dirty_ratio                                     u:object_r:proc_vm:s0
+
+# Touchscreen gesture wakeup node (FocalTech SPI)
+genfscon sysfs /devices/platform/1100a000.spi0/spi_master/spi1/spi1.0/fts_gesture_mode u:object_r:sysfs_tp_gesture:s0

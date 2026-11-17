@@ -115,15 +115,12 @@ PRODUCT_PACKAGES += \
     android.hardware.radio@1.4.vendor \
     android.hardware.radio.config@1.2.vendor
 
-# Telephony Jars
+# Telephony Jars are provided as standalone packages via PRODUCT_PACKAGES in vendor/micromax/yogurt/yogurt-vendor.mk
+# Do not add legacy/proprietary MTK vendor jars that fail AOT verification to PRODUCT_BOOT_JARS;
+# mediatek-common and mediatek-ims-base are pure Java/Binder helpers required by ImsService.apk.
 PRODUCT_BOOT_JARS += \
     mediatek-common \
-    mediatek-framework \
-    mediatek-ims-base \
-    mediatek-ims-common \
-    mediatek-telecom-common \
-    mediatek-telephony-base \
-    mediatek-telephony-common
+    mediatek-ims-base
 
 # TinyXML
 PRODUCT_PACKAGES += \
@@ -276,6 +273,7 @@ PRODUCT_COPY_FILES += \
 # Permissions
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/permissions/privapp-permissions-camera.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/permissions/privapp-permissions-camera.xml \
+    $(LOCAL_PATH)/configs/permissions/default-permissions-yogurt-gms.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/default-permissions/default-permissions-yogurt-gms.xml \
     frameworks/native/data/etc/android.hardware.audio.low_latency.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.audio.low_latency.xml \
     frameworks/native/data/etc/android.hardware.bluetooth.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.bluetooth.xml \
     frameworks/native/data/etc/android.hardware.bluetooth_le.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.bluetooth_le.xml \
@@ -345,9 +343,11 @@ PRODUCT_PACKAGES += \
     libprotobuf-cpp-full-vendorcompat \
     libprotobuf-cpp-lite-vendorcompat
 
-# Libstdc++
+# Libstdc++ / BoringSSL
 PRODUCT_PACKAGES += \
-    libstdc++_vendor
+    libstdc++_vendor \
+    libssl.vendor \
+    libssl.vendor:32
 
 # USB
 PRODUCT_PACKAGES += \
@@ -361,6 +361,10 @@ PRODUCT_PACKAGES += \
 # Vibrator
 PRODUCT_PACKAGES += \
     android.hardware.vibrator-service.yogurt
+
+# Memtrack
+PRODUCT_PACKAGES += \
+    android.hardware.memtrack-service.yogurt
 
 # Inherit several Android Go Configurations (Beneficial for everyone, even on non-Go devices)
 PRODUCT_USE_PROFILE_FOR_BOOT_IMAGE := true
@@ -387,3 +391,5 @@ PRODUCT_COPY_FILES += \
     prebuilts/vndk/v29/arm64/arch-arm64-armv8-a/shared/vndk-sp/libutils.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libutils-v29.so \
     prebuilts/vndk/v29/arm64/arch-arm64-armv8-a/shared/vndk-core/libxml2.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libxml2-v29.so \
     prebuilts/vndk/v30/arm64/arch-arm64-armv8-a/shared/vndk-core/libmedia_helper.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libmedia_helper-v30.so \
+    prebuilts/vndk/v34/arm64/arch-arm-armv8-a/shared/vndk-core/android.hardware.memtrack@1.0.so:$(TARGET_COPY_OUT_VENDOR)/lib/android.hardware.memtrack@1.0.so \
+    prebuilts/vndk/v34/arm64/arch-arm64-armv8-a/shared/vndk-core/android.hardware.memtrack@1.0.so:$(TARGET_COPY_OUT_VENDOR)/lib64/android.hardware.memtrack@1.0.so

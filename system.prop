@@ -42,8 +42,8 @@ ro.media.enc.jpeg.quality=100
 persist.sys.front_camera_sound_type=1
 persist.vendor.camera.HAL3.enabled=1
 persist.vendor.camera.eis.enable=1
-persist.vendor.camera.privapp.list=com.android.camera,com.google.camera,org.lineageos.aperture,com.google.android.GoogleCamera,com.google.android.GoogleCameraEng,com.google.android.GoogleCameraGood,com.google.android.GoogleCamera.Urnyx,com.google.android.apps.cameralite
-vendor.camera.aux.packagelist=com.android.camera,com.google.camera,net.sourceforge.opencamera,org.lineageos.aperture,com.google.android.GoogleCamera,com.google.android.GoogleCameraEng,com.google.android.GoogleCameraGood,com.google.android.GoogleCamera.Urnyx,com.google.android.apps.cameralite
+persist.vendor.camera.privapp.list=org.lineageos.aperture,com.android.camera,com.google.android.GoogleCamera
+vendor.camera.aux.packagelist=org.lineageos.aperture,com.android.camera,net.sourceforge.opencamera
 
 # IMS
 persist.dbg.volte_avail_ovr=1
@@ -62,4 +62,22 @@ ro.com.google.rlzbrandcode=MIIX
 ro.audio.silent=0
 Build.BRAND=MTK
 net.bt.name=Android
+
+# Memory Management Daemon (mmd) zRAM + idle writeback
+mmd.zram.enabled=true
+mmd.zram.comp_algorithm=lz4
+mmd.zram.size=75%
+mmd.zram.writeback.enabled=true
+mmd.zram.writeback.device_size=1073741824
+mmd.zram.writeback.min_free_space_mib=4096
+mmd.zram.writeback.idle.enabled=true
+mmd.zram.writeback.huge_idle.enabled=true
+mmd.zram.writeback.huge.enabled=true
+mmd.zram.writeback.min_idle_seconds=3600
+mmd.zram.writeback.max_idle_seconds=43200
+mmd.zram.writeback.backoff_seconds=300
+mmd.zram.writeback.min_bytes=2097152
+mmd.zram.writeback.max_bytes=134217728
+mmd.zram.writeback.limit.enabled=true
+mmd.zram.writeback.max_bytes_per_day=2147483648
 

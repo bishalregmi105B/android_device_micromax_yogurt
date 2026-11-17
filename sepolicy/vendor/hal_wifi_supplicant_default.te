@@ -1,0 +1,4 @@
+# Allow prebuilt MTK wpa_supplicant to traverse /data/vendor/wifi and perform
+# legacy os_program_init privilege setup cleanly on Android 17 sepolicy.
+allow hal_wifi_supplicant_default vendor_data_file:dir search;
+allow hal_wifi_supplicant_default self:global_capability_class_set { setuid setgid };

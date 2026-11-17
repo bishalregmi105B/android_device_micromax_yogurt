@@ -54,9 +54,9 @@ void load_dalvik_properties()
         heapminfree = "8m";
         heapmaxfree = "32m";
     } else if (sys.totalram >= 3ull * 1024 * 1024 * 1024) {
-        // from - phone-xhdpi-4096-dalvik-heap.mk
+        // from - phone-xhdpi-4096-dalvik-heap.mk (256m limit for smooth multitasking on 4GB LPDDR4X)
         heapstartsize = "8m";
-        heapgrowthlimit = "192m";
+        heapgrowthlimit = "256m";
         heapsize = "512m";
         heaptargetutilization = "0.6";
         heapminfree = "8m";

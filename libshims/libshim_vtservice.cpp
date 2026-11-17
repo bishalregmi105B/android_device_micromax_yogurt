@@ -4,6 +4,8 @@
 #include <ui/GraphicBufferMapper.h>
 #include <ui/Rect.h>
 
+#include <string>
+
 using namespace android;
 
 extern "C" {
@@ -18,7 +20,7 @@ status_t _ZN7android19GraphicBufferMapper6unlockEPK13native_handle(
         void* thisptr, buffer_handle_t handle) {
     return static_cast<GraphicBufferMapper*>(thisptr)->unlock(handle);
 }
-void _ZN7android10AudioTrackC1E19audio_stream_type_tj14audio_format_t20audio_channel_mask_tj20audio_output_flags_tRKNS_2wpINS0_19IAudioTrackCallbackEEEi15audio_session_tNS0_13transfer_typeEPK20audio_offload_info_tRKNS_7content22AttributionSourceStateEPK18audio_attributes_tbfi(
+void _ZN7android10AudioTrackC1E19audio_stream_type_tj14audio_format_t20audio_channel_mask_tj20audio_output_flags_tRKNS_2wpINS0_19IAudioTrackCallbackEEEi15audio_session_tNS0_13transfer_typeEPK20audio_offload_info_tRKNS_7content22AttributionSourceStateEPK18audio_attributes_tbfiRKNSt3__112basic_stringIcNSM_11char_traitsIcEENSM_9allocatorIcEEEE(
         void* thisptr,
         audio_stream_type_t streamType,
         uint32_t sampleRate,
@@ -35,7 +37,8 @@ void _ZN7android10AudioTrackC1E19audio_stream_type_tj14audio_format_t20audio_cha
         const audio_attributes_t* pAttributes,
         bool doNotReconnect,
         float maxRequiredSpeed,
-        audio_port_handle_t selectedDeviceId);
+        audio_port_handle_t selectedDeviceId,
+        const std::string& codecProvenance);
 
 void _ZN7android10AudioTrackC1E19audio_stream_type_tj14audio_format_tjj20audio_output_flags_tPFviPvS4_ES4_i15audio_session_tNS0_13transfer_typeEPK20audio_offload_info_tjiPK18audio_attributes_tbfi(
         void* thisptr,
@@ -62,10 +65,12 @@ void _ZN7android10AudioTrackC1E19audio_stream_type_tj14audio_format_tjj20audio_o
     attributionSource.pid = pid;
     attributionSource.packageName = "com.mediatek.ims";
     wp<AudioTrack::IAudioTrackCallback> callback;
-    _ZN7android10AudioTrackC1E19audio_stream_type_tj14audio_format_t20audio_channel_mask_tj20audio_output_flags_tRKNS_2wpINS0_19IAudioTrackCallbackEEEi15audio_session_tNS0_13transfer_typeEPK20audio_offload_info_tRKNS_7content22AttributionSourceStateEPK18audio_attributes_tbfi(
+    std::string codecProvenance = "";
+    _ZN7android10AudioTrackC1E19audio_stream_type_tj14audio_format_t20audio_channel_mask_tj20audio_output_flags_tRKNS_2wpINS0_19IAudioTrackCallbackEEEi15audio_session_tNS0_13transfer_typeEPK20audio_offload_info_tRKNS_7content22AttributionSourceStateEPK18audio_attributes_tbfiRKNSt3__112basic_stringIcNSM_11char_traitsIcEENSM_9allocatorIcEEEE(
                             thisptr, streamType, sampleRate, format, channelMask, frameCount, flags, callback,
                             notificationFrames, sessionId, transferType, offloadInfo,
-                            attributionSource, pAttributes, doNotReconnect, maxRequiredSpeed, selectedDeviceId);
+                            attributionSource, pAttributes, doNotReconnect, maxRequiredSpeed, selectedDeviceId,
+                            codecProvenance);
 }
 
 void _ZN7android7SurfaceC1ERKNS_2spINS_22IGraphicBufferProducerEEEbRKNS1_INS_7IBinderEEE(
